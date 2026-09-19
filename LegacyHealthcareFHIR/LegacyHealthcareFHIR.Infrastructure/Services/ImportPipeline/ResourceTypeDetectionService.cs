@@ -1,4 +1,6 @@
 ﻿using LegacyHealthcareFHIR.Core.Interfaces;
+using LegacyHealthcareFHIR.Core.Models;
+using LegacyHealthcareFHIR.Core.Models.Detection;
 using LegacyHealthcareFHIR.Core.Models.Import;
 using LegacyHealthcareFHIR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -36,27 +38,37 @@ public class ResourceTypeDetectionService
     public async Task<ResourceTypeDetectionResult> DetectAsync(int hospitalId,
         SourceFileData sourceFileData)
     {
-        var fingerprint =
-       GenerateSchemaFingerprint(sourceFileData.Headers);
+        var fingerprint = GenerateSchemaFingerprint(sourceFileData.Headers);
 
-        var existingDetection =
-            await _dbContext.ResourceTypeDetections
-                .FirstOrDefaultAsync(x =>
-                    x.HospitalId == hospitalId &&
-                    x.SchemaFingerprint == fingerprint &&
-                    x.IsApproved);
+        var detection = await _dbContext.ResourceTypeDetections
+                                   .FirstOrDefaultAsync(x =>
+                                       x.HospitalId == hospitalId &&
+                                       x.SchemaFingerprint == fingerprint);
 
-        if (existingDetection != null)
+        if (detection == null)
         {
-            return new ResourceTypeDetectionResult
+            var aiResult = await _aiService.DetectAsync(sourceFileData);
+
+            detection = new ResourceTypeDetection
             {
-                ResourceType = existingDetection.ResourceType,
-                IsApproved = true,
-                AiConfidence = null
+                HospitalId = hospitalId,
+                SchemaFingerprint = fingerprint,
+                ResourceType = aiResult.ResourceType,
+                AiConfidence = aiResult.AiConfidence,
+                IsApproved = false
             };
+
+            _dbContext.ResourceTypeDetections.Add(detection);
+
+            await _dbContext.SaveChangesAsync();
         }
 
-        var aiSuggestion = await _aiService.DetectAsync(sourceFileData);
-        return aiSuggestion;
+        return new ResourceTypeDetectionResult
+        {
+            DetectionId = detection.Id,
+            ResourceType = detection.ResourceType,
+            AiConfidence = detection.AiConfidence,
+            IsApproved = detection.IsApproved
+        };
     }
 }

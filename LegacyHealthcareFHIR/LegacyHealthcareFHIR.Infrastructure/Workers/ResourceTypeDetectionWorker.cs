@@ -1,6 +1,7 @@
 ﻿using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Models;
+using LegacyHealthcareFHIR.Core.Models.Detection;
 using LegacyHealthcareFHIR.Core.Models.Import;
 using LegacyHealthcareFHIR.Core.Models.Notifications;
 using LegacyHealthcareFHIR.Infrastructure.Data;

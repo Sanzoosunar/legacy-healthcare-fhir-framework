@@ -11,6 +11,7 @@ public class ResourceTypeDetection
     public string SchemaFingerprint { get; set; } = null!;
 
     public FhirResourceType ResourceType { get; set; }
+    public decimal AiConfidence { get; set; }
 
     public bool IsApproved { get; set; }
 }

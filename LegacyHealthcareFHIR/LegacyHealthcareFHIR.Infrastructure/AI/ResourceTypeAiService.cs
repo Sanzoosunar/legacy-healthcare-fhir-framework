@@ -1,12 +1,13 @@
 ﻿#pragma warning disable OPENAI001
 
-using System.Text;
-using System.Text.Json;
 using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
+using LegacyHealthcareFHIR.Core.Models.Detection;
 using LegacyHealthcareFHIR.Core.Models.Import;
 using Microsoft.Extensions.Configuration;
 using OpenAI.Responses;
+using System.Text;
+using System.Text.Json;
 
 namespace LegacyHealthcareFHIR.Infrastructure.AI;
 
@@ -28,7 +29,7 @@ public class ResourceTypeAiService : IResourceTypeAiService
         _client = new ResponsesClient(apiKey);
     }
 
-    public async Task<ResourceTypeDetectionResult> DetectAsync(
+    public async Task<ResourceTypeDetectionAiResult> DetectAsync(
         SourceFileData sourceFileData)
     {
         var prompt = BuildPrompt(sourceFileData);
@@ -62,7 +63,7 @@ public class ResourceTypeAiService : IResourceTypeAiService
                 $"Unsupported FHIR resource type: {result.ResourceType}");
         }
 
-        return new ResourceTypeDetectionResult
+        return new ResourceTypeDetectionAiResult
         {
             ResourceType = resourceType,
             AiConfidence = result.Confidence
