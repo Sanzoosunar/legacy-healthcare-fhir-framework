@@ -6,3 +6,51 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+
+<h3>SignalR Test</h3>
+
+<p id="connectionStatus">Connecting...</p>
+
+<button id="testButton" type="button">
+    Send Test Notification
+</button>
+
+<p id="receivedMessage"></p>
+
+<script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/notifications/fhir-integration")
+        .build();
+
+    connection.on("TestNotification", function(data) {
+
+        console.log("Notification received:", data);
+
+        document.getElementById("receivedMessage").innerText =
+            data.message;
+    });
+
+    connection.start()
+        .then(function() {
+            document.getElementById("connectionStatus").innerText =
+                "Connected";
+        })
+        .catch(function(error) {
+            console.error(error);
+
+            document.getElementById("connectionStatus").innerText =
+                "Connection failed";
+        });
+
+    document.getElementById("testButton")
+        .addEventListener("click", async function() {
+
+            await fetch("/Home/TestNotification", {
+                method: "POST"
+            });
+        });
+</script>
+

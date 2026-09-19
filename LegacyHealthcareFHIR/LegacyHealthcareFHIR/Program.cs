@@ -1,5 +1,7 @@
 using LegacyHealthcareFHIR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using LegacyHealthcareFHIR.Core.Interfaces;
+using LegacyHealthcareFHIR.Web.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+builder.Services.AddSignalR();
+builder.Services.AddScoped<ISignalRNotifier, SignalRNotifier>();
 
 var app = builder.Build();
 
@@ -40,5 +45,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapHub<SignalRHub>("/notifications/fhir-integration");
 
 app.Run();

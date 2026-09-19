@@ -14,7 +14,6 @@
     <Folder Include="H17\" />
     <Folder Include="AI\" />
     <Folder Include="Fhir\" />
-    <Folder Include="Services\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
 
@@ -25,6 +24,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+    <!-- Add SignalR server types so Hub and related types are available to this class library -->
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
   </ItemGroup>
 
 </Project>

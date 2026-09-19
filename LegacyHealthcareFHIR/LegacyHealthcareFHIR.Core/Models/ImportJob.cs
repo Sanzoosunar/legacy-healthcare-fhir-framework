@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using LegacyHealthcareFHIR.Core.Enums;
 namespace LegacyHealthcareFHIR.Core.Models;
 
 public class ImportJob
@@ -9,14 +7,13 @@ public class ImportJob
 
     public int HospitalId { get; set; }
 
-    public required string FileName { get; set; }
+    public string OriginalFileName { get; set; }
 
-    public required string InputFormat { get; set; }
+    public string StoredFileName { get; set; }
+    public string InputFormat { get; set; }
 
-    public required string ResourceType { get; set; }
-
-    public string Status { get; set; } = "Pending";
-
+    public FhirResourceType? ResourceType { get; set; }
+    public JobStatus Status { get; set; } = JobStatus.Pending;
     public int ProgressPercentage { get; set; } = 0;
 
     public int TotalRecords { get; set; }

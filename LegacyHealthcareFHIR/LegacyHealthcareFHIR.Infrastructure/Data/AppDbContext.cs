@@ -20,9 +20,9 @@ public class AppDbContext : DbContext
 
     public DbSet<ImportJob> ImportJobs => Set<ImportJob>();
 
-    public DbSet<MappingProfile> MappingProfiles => Set<MappingProfile>();
+    public DbSet<MappingConfiguration> MappingProfiles => Set<MappingConfiguration>();
 
-    public DbSet<MappingField> MappingFields => Set<MappingField>();
+    public DbSet<FieldMapping> MappingFields => Set<FieldMapping>();
 
     public DbSet<FhirResource> FhirResources => Set<FhirResource>();
 
@@ -77,7 +77,7 @@ public class AppDbContext : DbContext
         });
 
         // Mapping Profile
-        modelBuilder.Entity<MappingProfile>(entity =>
+        modelBuilder.Entity<MappingConfiguration>(entity =>
         {
             entity.HasKey(x => x.Id);
 
@@ -88,13 +88,13 @@ public class AppDbContext : DbContext
         });
 
         // Mapping Field
-        modelBuilder.Entity<MappingField>(entity =>
+        modelBuilder.Entity<FieldMapping>(entity =>
         {
             entity.HasKey(x => x.Id);
 
-            entity.HasOne<MappingProfile>()
+            entity.HasOne<MappingConfiguration>()
                 .WithMany()
-                .HasForeignKey(x => x.MappingProfileId)
+                .HasForeignKey(x => x.ConfigId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
