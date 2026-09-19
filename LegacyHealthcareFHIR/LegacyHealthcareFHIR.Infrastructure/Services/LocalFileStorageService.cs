@@ -19,4 +19,13 @@
 
         await fileStream.CopyToAsync(outputStream);
     }
+
+    public Stream OpenRead(string fileName)
+    {
+        var filePath = Path.Combine(
+            _uploadDirectory,
+            fileName);
+
+        return File.OpenRead(filePath);
+    }
 }

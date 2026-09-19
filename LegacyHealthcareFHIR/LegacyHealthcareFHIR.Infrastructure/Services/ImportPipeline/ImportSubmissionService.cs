@@ -2,7 +2,7 @@
 using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Infrastructure.Data;
 
-namespace LegacyHealthcareFHIR.Infrastructure.Services;
+namespace LegacyHealthcareFHIR.Infrastructure.Services.ImportPipeline;
 
 public class ImportSubmissionService
 {

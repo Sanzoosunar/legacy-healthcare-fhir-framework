@@ -29,6 +29,22 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ResourceTypeDetections",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    HospitalId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SchemaFingerprint = table.Column<string>(type: "TEXT", nullable: false),
+                    ResourceType = table.Column<int>(type: "INTEGER", nullable: false),
+                    IsApproved = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ResourceTypeDetections", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "HospitalConfigurations",
                 columns: table => new
                 {
@@ -60,10 +76,11 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     HospitalId = table.Column<int>(type: "INTEGER", nullable: false),
-                    FileName = table.Column<string>(type: "TEXT", nullable: false),
+                    OriginalFileName = table.Column<string>(type: "TEXT", nullable: false),
+                    StoredFileName = table.Column<string>(type: "TEXT", nullable: false),
                     InputFormat = table.Column<string>(type: "TEXT", nullable: false),
-                    ResourceType = table.Column<string>(type: "TEXT", nullable: false),
-                    Status = table.Column<string>(type: "TEXT", nullable: false),
+                    ResourceType = table.Column<int>(type: "INTEGER", nullable: true),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
                     ProgressPercentage = table.Column<int>(type: "INTEGER", nullable: false),
                     TotalRecords = table.Column<int>(type: "INTEGER", nullable: false),
                     SuccessfulRecords = table.Column<int>(type: "INTEGER", nullable: false),
@@ -91,13 +108,8 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     HospitalId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    ResourceType = table.Column<string>(type: "TEXT", nullable: false),
-                    Status = table.Column<string>(type: "TEXT", nullable: false),
-                    Version = table.Column<int>(type: "INTEGER", nullable: false),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ApprovedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    ResourceType = table.Column<int>(type: "INTEGER", nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -148,21 +160,19 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    MappingProfileId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ConfigId = table.Column<int>(type: "INTEGER", nullable: false),
                     SourceField = table.Column<string>(type: "TEXT", nullable: false),
-                    TargetField = table.Column<string>(type: "TEXT", nullable: false),
+                    NormalizedField = table.Column<string>(type: "TEXT", nullable: false),
                     AiConfidence = table.Column<decimal>(type: "TEXT", nullable: true),
                     AiExplanation = table.Column<string>(type: "TEXT", nullable: true),
-                    IsApproved = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ApprovedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    Status = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MappingFields", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MappingFields_MappingProfiles_MappingProfileId",
-                        column: x => x.MappingProfileId,
+                        name: "FK_MappingFields_MappingProfiles_ConfigId",
+                        column: x => x.ConfigId,
                         principalTable: "MappingProfiles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -202,14 +212,20 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                 column: "HospitalId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MappingFields_MappingProfileId",
+                name: "IX_MappingFields_ConfigId",
                 table: "MappingFields",
-                column: "MappingProfileId");
+                column: "ConfigId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MappingProfiles_HospitalId",
                 table: "MappingProfiles",
                 column: "HospitalId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ResourceTypeDetections_HospitalId_SchemaFingerprint",
+                table: "ResourceTypeDetections",
+                columns: new[] { "HospitalId", "SchemaFingerprint" },
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -223,6 +239,9 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "MappingFields");
+
+            migrationBuilder.DropTable(
+                name: "ResourceTypeDetections");
 
             migrationBuilder.DropTable(
                 name: "ImportJobs");

@@ -18,19 +18,19 @@ namespace LegacyHealthcareFHIR.Controllers
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> TestNotification()
-        {
-            await _signalRNotifier.SendAsync(
-                "TestNotification",
-                new
-                {
-                    Message = "SignalR is working!",
-                    Time = DateTime.UtcNow
-                });
+        //[HttpPost]
+        //public async Task<IActionResult> TestNotification()
+        //{
+        //    await _signalRNotifier.SendAsync(
+        //        "TestNotification",
+        //        new
+        //        {
+        //            Message = "SignalR is working!",
+        //            Time = DateTime.UtcNow
+        //        });
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
         public IActionResult Privacy()
         {

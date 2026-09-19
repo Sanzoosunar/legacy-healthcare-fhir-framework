@@ -1,4 +1,6 @@
-﻿using LegacyHealthcareFHIR.Core.Interfaces;
+﻿using LegacyHealthcareFHIR.Core.Enums;
+using LegacyHealthcareFHIR.Core.Interfaces;
+using LegacyHealthcareFHIR.Core.Models.Notifications;
 using Microsoft.AspNetCore.SignalR;
 
 namespace LegacyHealthcareFHIR.Web.SignalR;
@@ -13,12 +15,12 @@ public class SignalRNotifier : ISignalRNotifier
         _hubContext = hubContext;
     }
 
+
     public async Task SendAsync(
-        string eventName,
-        object data)
+        JobNotificationEvent notificationEvent)
     {
         await _hubContext.Clients.All.SendAsync(
-            eventName,
-            data);
+            notificationEvent.EventType.ToString(),
+            notificationEvent);
     }
 }

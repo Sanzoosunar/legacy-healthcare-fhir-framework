@@ -59,6 +59,39 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                     b.ToTable("FhirResources");
                 });
 
+            modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.FieldMapping", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("AiConfidence")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AiExplanation")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ConfigId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("NormalizedField")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SourceField")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConfigId");
+
+                    b.ToTable("MappingFields");
+                });
+
             modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.Hospital", b =>
                 {
                     b.Property<int>("Id")
@@ -152,10 +185,6 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                     b.Property<int>("FailedRecords")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("HospitalId")
                         .HasColumnType("INTEGER");
 
@@ -163,17 +192,23 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ProgressPercentage")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ResourceType")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("ResourceType")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("StartedAtUtc")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Status")
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StoredFileName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -190,76 +225,19 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                     b.ToTable("ImportJobs");
                 });
 
-            modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.MappingField", b =>
+            modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.MappingConfiguration", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<decimal?>("AiConfidence")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AiExplanation")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("ApprovedAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MappingProfileId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SourceField")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TargetField")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MappingProfileId");
-
-                    b.ToTable("MappingFields");
-                });
-
-            modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.MappingProfile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("ApprovedAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("HospitalId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<int>("ResourceType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ResourceType")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Version")
+                    b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -267,6 +245,33 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                     b.HasIndex("HospitalId");
 
                     b.ToTable("MappingProfiles");
+                });
+
+            modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.ResourceTypeDetection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("HospitalId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ResourceType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SchemaFingerprint")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HospitalId", "SchemaFingerprint")
+                        .IsUnique();
+
+                    b.ToTable("ResourceTypeDetections");
                 });
 
             modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.FhirResource", b =>
@@ -280,6 +285,15 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                     b.HasOne("LegacyHealthcareFHIR.Core.Models.ImportJob", null)
                         .WithMany()
                         .HasForeignKey("ImportJobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.FieldMapping", b =>
+                {
+                    b.HasOne("LegacyHealthcareFHIR.Core.Models.MappingConfiguration", null)
+                        .WithMany()
+                        .HasForeignKey("ConfigId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -302,16 +316,7 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.MappingField", b =>
-                {
-                    b.HasOne("LegacyHealthcareFHIR.Core.Models.MappingProfile", null)
-                        .WithMany()
-                        .HasForeignKey("MappingProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.MappingProfile", b =>
+            modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.MappingConfiguration", b =>
                 {
                     b.HasOne("LegacyHealthcareFHIR.Core.Models.Hospital", null)
                         .WithMany()

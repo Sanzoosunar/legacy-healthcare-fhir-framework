@@ -25,7 +25,8 @@ public class AppDbContext : DbContext
     public DbSet<FieldMapping> MappingFields => Set<FieldMapping>();
 
     public DbSet<FhirResource> FhirResources => Set<FhirResource>();
-
+    public DbSet<ResourceTypeDetection> ResourceTypeDetections
+    => Set<ResourceTypeDetection>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -113,5 +114,13 @@ public class AppDbContext : DbContext
                 .HasForeignKey(x => x.ImportJobId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+        modelBuilder.Entity<ResourceTypeDetection>()
+            .HasIndex(x => new
+            {
+                x.HospitalId,
+                x.SchemaFingerprint
+            })
+            .IsUnique();
     }
 }

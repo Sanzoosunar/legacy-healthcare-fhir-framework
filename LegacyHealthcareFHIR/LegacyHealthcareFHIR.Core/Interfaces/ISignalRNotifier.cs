@@ -1,8 +1,10 @@
-﻿namespace LegacyHealthcareFHIR.Core.Interfaces;
+﻿using LegacyHealthcareFHIR.Core.Enums;
+using LegacyHealthcareFHIR.Core.Models.Notifications;
+
+namespace LegacyHealthcareFHIR.Core.Interfaces;
 
 public interface ISignalRNotifier
 {
-    Task SendAsync(
-        string eventName,
-        object data);
+    Task SendAsync(JobNotificationEvent notificationEvent);
+
 }
