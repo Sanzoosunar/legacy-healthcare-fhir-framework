@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="LegacyHealthcareFHIR.Core/LegacyHealthcareFHIR.Core.csproj" Id="1de388bc-bb3a-47c4-9039-431edea01bf6" />
+  <Project Path="LegacyHealthcareFHIR.Infrastructure/LegacyHealthcareFHIR.Infrastructure.csproj" Id="2f6b1bbf-9760-4c62-b0ae-d42499625666" />
+  <Project Path="LegacyHealthcareFHIR.Tests/LegacyHealthcareFHIR.Tests.csproj" Id="3947198a-c842-40ac-9312-66b141e71624" />
+  <Project Path="LegacyHealthcareFHIR/LegacyHealthcareFHIR.Web.csproj" />
+</Solution>
