@@ -19,7 +19,7 @@ public class ImportsServiceTests : TestBase
             OriginalFileName = "patients.csv",
             StoredFileName = "stored_patients.csv",
             InputFormat = "CSV",
-            Status = JobStatus.Pending
+            Status = JobStatus.Started
         };
 
         _detection = new ResourceTypeDetection
@@ -34,9 +34,9 @@ public class ImportsServiceTests : TestBase
 
     private async Task SaveJobAndDetectionAsync()
     {
-        DbContext.ImportJobs.Add(_job);
-        DbContext.ResourceTypeDetections.Add(_detection);
-        await DbContext.SaveChangesAsync();
+        _dbcontext.ImportJobs.Add(_job);
+        _dbcontext.ResourceTypeDetections.Add(_detection);
+        await _dbcontext.SaveChangesAsync();
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public class ImportsServiceTests : TestBase
     {
         await SaveJobAndDetectionAsync();
 
-        var result = await ImportsService.ApproveResourceTypeAsync(_job.Id, _detection.Id, FhirResourceType.Patient);
+        var result = await _importService.ApproveResourceTypeAsync(_job.Id, _detection.Id, FhirResourceType.Patient);
 
         Assert.True(result);
         Assert.True(_detection.IsApproved);
@@ -56,17 +56,17 @@ public class ImportsServiceTests : TestBase
     public async Task ApproveResourceTypeAsync_JobDoesNotExist_ThrowsException()
     {
         await Assert.ThrowsAsync<Exception>(() =>
-            ImportsService.ApproveResourceTypeAsync(Guid.NewGuid(), 1, FhirResourceType.Patient));
+            _importService.ApproveResourceTypeAsync(Guid.NewGuid(), 1, FhirResourceType.Patient));
     }
 
     [Fact]
     public async Task ApproveResourceTypeAsync_DetectionDoesNotExist_ThrowsException()
     {
-        DbContext.ImportJobs.Add(_job);
-        await DbContext.SaveChangesAsync();
+        _dbcontext.ImportJobs.Add(_job);
+        await _dbcontext.SaveChangesAsync();
 
         await Assert.ThrowsAsync<Exception>(() =>
-            ImportsService.ApproveResourceTypeAsync(_job.Id, 999, FhirResourceType.Patient));
+            _importService.ApproveResourceTypeAsync(_job.Id, 999, FhirResourceType.Patient));
     }
 
     [Fact]
@@ -77,6 +77,6 @@ public class ImportsServiceTests : TestBase
         await SaveJobAndDetectionAsync();
 
         await Assert.ThrowsAsync<Exception>(() =>
-            ImportsService.ApproveResourceTypeAsync(_job.Id, _detection.Id, FhirResourceType.Patient));
+            _importService.ApproveResourceTypeAsync(_job.Id, _detection.Id, FhirResourceType.Patient));
     }
 }

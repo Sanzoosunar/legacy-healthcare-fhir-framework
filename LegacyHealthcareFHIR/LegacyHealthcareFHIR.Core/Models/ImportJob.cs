@@ -13,7 +13,8 @@ public class ImportJob
     public string InputFormat { get; set; }
 
     public FhirResourceType? ResourceType { get; set; }
-    public JobStatus Status { get; set; } = JobStatus.Pending;
+    public JobStatus Status { get; set; } = JobStatus.Started;
+    public JobStage JobStage { get; set; } = JobStage.ResourceTypeDetection;
     public int ProgressPercentage { get; set; } = 0;
 
     public int TotalRecords { get; set; }

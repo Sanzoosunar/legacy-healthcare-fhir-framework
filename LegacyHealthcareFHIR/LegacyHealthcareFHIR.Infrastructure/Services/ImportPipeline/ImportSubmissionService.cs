@@ -37,7 +37,8 @@ public class ImportSubmissionService
             OriginalFileName = originalFileName,
             StoredFileName = storedFileName,
             InputFormat = inputFormat,
-            Status = JobStatus.Pending
+            Status = JobStatus.Started,
+            JobStage=JobStage.ResourceTypeDetection
         };
 
         await _fileStorage.SaveAsync(

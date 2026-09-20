@@ -1,8 +1,11 @@
-﻿using System;
+﻿using LegacyHealthcareFHIR.Core.Models;
+using LegacyHealthcareFHIR.Core.Models.Import;
+using LegacyHealthcareFHIR.Core.Models.Legacy;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Text;
-using LegacyHealthcareFHIR.Core.Models;
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace LegacyHealthcareFHIR.Infrastructure.Data;
 
@@ -20,13 +23,13 @@ public class AppDbContext : DbContext
 
     public DbSet<ImportJob> ImportJobs => Set<ImportJob>();
 
-    public DbSet<MappingConfiguration> MappingProfiles => Set<MappingConfiguration>();
+    public DbSet<MappingConfiguration> MappingConfigurations => Set<MappingConfiguration>();
 
-    public DbSet<FieldMapping> MappingFields => Set<FieldMapping>();
-
+    public DbSet<FieldMapping> FieldMappings => Set<FieldMapping>();
     public DbSet<FhirResource> FhirResources => Set<FhirResource>();
     public DbSet<ResourceTypeDetection> ResourceTypeDetections
     => Set<ResourceTypeDetection>();
+    public DbSet<SourceFileData> SourceFileData => Set<SourceFileData>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -77,27 +80,20 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Mapping Profile
-        modelBuilder.Entity<MappingConfiguration>(entity =>
-        {
-            entity.HasKey(x => x.Id);
+        modelBuilder.Entity<MappingConfiguration>()
+         .HasIndex(x => new
+         {
+             x.HospitalId,
+             x.SchemaFingerprint,
+             x.ResourceType
+         })
+         .IsUnique();
 
-            entity.HasOne<Hospital>()
-                .WithMany()
-                .HasForeignKey(x => x.HospitalId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // Mapping Field
-        modelBuilder.Entity<FieldMapping>(entity =>
-        {
-            entity.HasKey(x => x.Id);
-
-            entity.HasOne<MappingConfiguration>()
-                .WithMany()
-                .HasForeignKey(x => x.ConfigId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
+        modelBuilder.Entity<FieldMapping>()
+            .HasOne(x => x.MappingConfiguration)
+            .WithMany(x => x.FieldMappings)
+            .HasForeignKey(x => x.ConfigId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // FHIR Resource
         modelBuilder.Entity<FhirResource>(entity =>
@@ -121,6 +117,22 @@ public class AppDbContext : DbContext
                 x.HospitalId,
                 x.SchemaFingerprint
             })
+            .IsUnique();
+
+        modelBuilder.Entity<SourceFileData>()
+            .Property(x => x.Headers)
+            .HasConversion(
+                x => JsonSerializer.Serialize(x, (JsonSerializerOptions?)null),
+                x => JsonSerializer.Deserialize<List<string>>(x, (JsonSerializerOptions?)null) ?? new());
+
+        modelBuilder.Entity<SourceFileData>()
+            .Property(x => x.SampleRecords)
+            .HasConversion(
+                x => JsonSerializer.Serialize(x, (JsonSerializerOptions?)null),
+                x => JsonSerializer.Deserialize<List<LegacyRecord>>(x, (JsonSerializerOptions?)null) ?? new());
+
+        modelBuilder.Entity<SourceFileData>()
+            .HasIndex(x => x.ImportJobId)
             .IsUnique();
     }
 }

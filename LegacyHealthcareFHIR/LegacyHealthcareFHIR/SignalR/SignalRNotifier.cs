@@ -15,12 +15,20 @@ public class SignalRNotifier : ISignalRNotifier
         _hubContext = hubContext;
     }
 
-
     public async Task SendAsync(
         JobNotificationEvent notificationEvent)
     {
-        await _hubContext.Clients.All.SendAsync(
-            notificationEvent.EventType.ToString(),
-            notificationEvent);
+        await _hubContext.Clients.All.SendAsync("JobUpdated", notificationEvent);
+    }
+
+    public async Task SendAsync(Guid jobId, JobStage stage, JobStatus status, object? data = null)
+    {
+        await SendAsync(new JobNotificationEvent
+        {
+            JobId = jobId,
+            Stage = stage,
+            Status = status,
+            Data = data
+        });
     }
 }

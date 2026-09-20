@@ -8,24 +8,36 @@ namespace LegacyHealthcareFHIR.Tests;
 
 public abstract class TestBase : IAsyncLifetime
 {
-    protected readonly AppDbContext DbContext;
-    protected readonly Mock<IResourceTypeAiService> AiService;
-    protected readonly Mock<ISignalRNotifier> SignalRNotifier;
-    protected readonly ResourceTypeDetectionService ResourceTypeDetectionService;
-    protected readonly ImportsService ImportsService;
+    protected readonly AppDbContext _dbcontext;
 
+    protected readonly Mock<IJobRepository> _jobRepositoryMock;
+
+
+    protected readonly Mock<IResourceTypeAiService> _resourceTypeAiServiceMock;
+    protected readonly Mock<ISignalRNotifier> _signalRNotifierMock;
+    protected readonly Mock<IFieldMappingAiService> _fieldMappingAiServiceMock;
+
+
+    protected readonly ResourceTypeDetectionService _resourceTypeDetectionService;
+    protected readonly ImportsService _importService;
+    protected readonly FieldMappingService _fieldMappingService;
     protected TestBase()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        DbContext = new AppDbContext(options);
-        AiService = new Mock<IResourceTypeAiService>();
-        SignalRNotifier = new Mock<ISignalRNotifier>();
+        _dbcontext = new AppDbContext(options);
 
-        ResourceTypeDetectionService = new ResourceTypeDetectionService(DbContext, AiService.Object);
-        ImportsService = new ImportsService(DbContext);
+        _jobRepositoryMock = new Mock<IJobRepository>();
+
+        _resourceTypeAiServiceMock = new Mock<IResourceTypeAiService>();
+        _signalRNotifierMock = new Mock<ISignalRNotifier>();
+        _fieldMappingAiServiceMock = new Mock<IFieldMappingAiService>();
+
+        _resourceTypeDetectionService = new ResourceTypeDetectionService(_dbcontext, _resourceTypeAiServiceMock.Object);
+        _importService = new ImportsService(_dbcontext);
+        _fieldMappingService = new FieldMappingService(_dbcontext, _fieldMappingAiServiceMock.Object);
     }
 
     public Task InitializeAsync()
@@ -35,6 +47,6 @@ public abstract class TestBase : IAsyncLifetime
 
     public virtual async Task DisposeAsync()
     {
-        await DbContext.DisposeAsync();
+        await _dbcontext.DisposeAsync();
     }
 }

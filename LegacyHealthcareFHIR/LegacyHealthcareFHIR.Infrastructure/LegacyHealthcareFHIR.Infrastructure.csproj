@@ -13,7 +13,6 @@
   <ItemGroup>
     <Folder Include="H17\" />
     <Folder Include="Fhir\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
   <ItemGroup>

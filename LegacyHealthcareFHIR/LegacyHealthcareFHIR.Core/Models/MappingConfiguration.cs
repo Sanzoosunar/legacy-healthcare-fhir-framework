@@ -1,15 +1,12 @@
 ﻿using LegacyHealthcareFHIR.Core.Enums;
-using System;
-using System.Collections.Generic;
-using System.Security.AccessControl;
-using System.Text;
-
-namespace LegacyHealthcareFHIR.Core.Models;
+using LegacyHealthcareFHIR.Core.Models;
 
 public class MappingConfiguration
 {
     public int Id { get; set; }
     public int HospitalId { get; set; }
-    public ResourceType ResourceType { get; set; }
-    public MappingStatus Status { get; set; } = MappingStatus.Draft;
+    public string SchemaFingerprint { get; set; } = null!;
+    public FhirResourceType ResourceType { get; set; }
+    public bool IsApproved { get; set; }
+    public List<FieldMapping> FieldMappings { get; set; } = new();
 }

@@ -2,6 +2,8 @@ using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Infrastructure.AI;
 using LegacyHealthcareFHIR.Infrastructure.Csv;
 using LegacyHealthcareFHIR.Infrastructure.Data;
+using LegacyHealthcareFHIR.Infrastructure.Queues;
+using LegacyHealthcareFHIR.Infrastructure.Repositories;
 using LegacyHealthcareFHIR.Infrastructure.Services;
 using LegacyHealthcareFHIR.Web.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +18,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<IAiService, OpenAiService>();
 builder.Services.AddScoped<ISignalRNotifier, SignalRNotifier>();
 builder.Services.AddScoped<LegacyCsvReader>();
 builder.Services.AddScoped<SourceFileService>();
-builder.Services.AddScoped<
-    IResourceTypeAiService,
-    ResourceTypeAiService>();
+
+builder.Services.AddScoped<IJobRepository, JobRepository>();
+
+builder.Services.AddScoped<IResourceTypeAiService,ResourceTypeAiService>();
+builder.Services.AddScoped<IFieldMappingAiService, FieldMappingAiService>();
+
 builder.Services.AddSingleton(sp =>
 {
     var environment =
@@ -34,6 +40,8 @@ builder.Services.AddSingleton(sp =>
 
     return new LocalFileStorageService(uploadDirectory);
 });
+
+builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
 
 var app = builder.Build();
 

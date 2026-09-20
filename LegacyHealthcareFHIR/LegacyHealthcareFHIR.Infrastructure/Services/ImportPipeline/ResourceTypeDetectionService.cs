@@ -2,6 +2,7 @@
 using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Detection;
 using LegacyHealthcareFHIR.Core.Models.Import;
+using LegacyHealthcareFHIR.Core.Utilities;
 using LegacyHealthcareFHIR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -21,24 +22,11 @@ public class ResourceTypeDetectionService
         _dbContext = dbContext;
         _aiService = aiService;
     }
-    public string GenerateSchemaFingerprint(
-        List<string> headers)
-    {
-        var normalizedHeaders = headers
-            .Select(x => x.Trim().ToLowerInvariant())
-            .OrderBy(x => x);
-
-        var schema = string.Join("|", normalizedHeaders);
-
-        var bytes = SHA256.HashData(
-            Encoding.UTF8.GetBytes(schema));
-
-        return Convert.ToHexString(bytes);
-    }
+    
     public async Task<ResourceTypeDetectionResult> DetectAsync(int hospitalId,
         SourceFileData sourceFileData)
     {
-        var fingerprint = GenerateSchemaFingerprint(sourceFileData.Headers);
+        var fingerprint = SchemaFingerprintUtility.GenerateFromHeaders(sourceFileData.Headers);
 
         var detection = await _dbContext.ResourceTypeDetections
                                    .FirstOrDefaultAsync(x =>

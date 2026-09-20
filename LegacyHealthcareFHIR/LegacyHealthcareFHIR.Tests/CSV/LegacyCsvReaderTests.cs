@@ -87,4 +87,16 @@ public class LegacyCsvReaderTests
             CsvReadErrorType.InvalidCsv,
             result.Errors[0].ErrorType);
     }
+
+    [Theory]
+    [InlineData("PAT_ID,FIRST_NM,LAST_NM")]
+    [InlineData("1001,John,Smith")]
+    public void Read_OnlyOneRow_ThrowsInvalidOperationException(string csvContent)
+    {
+        using var stream = TestStreamHelper.CreateStream(csvContent);
+        var csvReader = new LegacyCsvReader();
+
+        Assert.Throws<InvalidOperationException>(() => csvReader.Read(stream));
+
+    }
 }

@@ -3,6 +3,7 @@ using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Detection;
 using LegacyHealthcareFHIR.Core.Models.Import;
+using LegacyHealthcareFHIR.Core.Utilities;
 using LegacyHealthcareFHIR.Infrastructure.Data;
 using LegacyHealthcareFHIR.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +45,7 @@ public class ResourceTypeDetectionServiceTests : IAsyncLifetime
 
     private async Task SaveDetectionAsync(ResourceTypeDetection detection)
     {
-        detection.SchemaFingerprint = _service.GenerateSchemaFingerprint(_sourceData.Headers);
+        detection.SchemaFingerprint = SchemaFingerprintUtility.GenerateFromHeaders(_sourceData.Headers);
 
         _dbContext.ResourceTypeDetections.Add(detection);
         await _dbContext.SaveChangesAsync();

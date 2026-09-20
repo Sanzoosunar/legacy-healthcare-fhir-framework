@@ -46,6 +46,9 @@ public class LegacyCsvReader
                 records.Add(record);
             }
 
+            if (records.Count == 0)
+                throw new InvalidOperationException("Invalid CSV");
+
             return new CsvReadResult
             {
                 IsSuccess = true,

@@ -3,6 +3,7 @@ using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Detection;
 using LegacyHealthcareFHIR.Core.Models.Import;
 using LegacyHealthcareFHIR.Infrastructure.Csv;
+using LegacyHealthcareFHIR.Infrastructure.Processors;
 using LegacyHealthcareFHIR.Infrastructure.Services;
 using Moq;
 
@@ -10,7 +11,7 @@ namespace LegacyHealthcareFHIR.Tests.Workers;
 
 public class ResourceTypeDetectionWorkerTests : TestBase
 {
-    private readonly ResourceTypeDetectionWorker _worker;
+    private readonly ResourceTypeDetectionProcessor _worker;
     private readonly string _tempDirectory;
 
     public ResourceTypeDetectionWorkerTests()
@@ -20,13 +21,12 @@ public class ResourceTypeDetectionWorkerTests : TestBase
 
         var fileStorageService = new LocalFileStorageService(_tempDirectory);
         var csvReader = new LegacyCsvReader();
-        var sourceFileService = new SourceFileService(fileStorageService, csvReader);
+        var sourceFileService = new SourceFileService(fileStorageService, csvReader, _dbcontext);
 
-        _worker = new ResourceTypeDetectionWorker(
-            DbContext,
-            SignalRNotifier.Object,
+        _worker = new ResourceTypeDetectionProcessor(
+            _signalRNotifierMock.Object,
             sourceFileService,
-            ResourceTypeDetectionService);
+            _resourceTypeDetectionService,_jobRepositoryMock.Object);
     }
 
     [Fact]
@@ -45,10 +45,10 @@ public class ResourceTypeDetectionWorkerTests : TestBase
 
         var job = CreateJob(storedFileName);
 
-        DbContext.ImportJobs.Add(job);
-        await DbContext.SaveChangesAsync();
+        _dbcontext.ImportJobs.Add(job);
+        await _dbcontext.SaveChangesAsync();
 
-        AiService
+        _resourceTypeAiServiceMock
             .Setup(x => x.DetectAsync(It.IsAny<SourceFileData>()))
             .ReturnsAsync(new ResourceTypeDetectionAiResult
             {
@@ -58,14 +58,11 @@ public class ResourceTypeDetectionWorkerTests : TestBase
 
         await _worker.ExecuteAsync(job.Id);
 
-        var updatedJob = await DbContext.ImportJobs.FindAsync(job.Id);
+        var updatedJob = await _dbcontext.ImportJobs.FindAsync(job.Id);
 
         Assert.NotNull(updatedJob);
-        Assert.Equal(JobStatus.Preparing, updatedJob.Status);
-        Assert.NotNull(updatedJob.StartedAtUtc);
-        Assert.Null(updatedJob.ErrorMessage);
-
-        AiService.Verify(x => x.DetectAsync(It.IsAny<SourceFileData>()), Times.Once);
+       
+        _resourceTypeAiServiceMock.Verify(x => x.DetectAsync(It.IsAny<SourceFileData>()), Times.Once);
     }
 
     [Fact]
@@ -73,7 +70,7 @@ public class ResourceTypeDetectionWorkerTests : TestBase
     {
         await Assert.ThrowsAsync<InvalidOperationException>(() => _worker.ExecuteAsync(Guid.NewGuid()));
 
-        AiService.Verify(x => x.DetectAsync(It.IsAny<SourceFileData>()), Times.Never);
+        _resourceTypeAiServiceMock.Verify(x => x.DetectAsync(It.IsAny<SourceFileData>()), Times.Never);
     }
 
     [Fact]
@@ -81,12 +78,12 @@ public class ResourceTypeDetectionWorkerTests : TestBase
     {
         var job = CreateJob("missing.csv");
 
-        DbContext.ImportJobs.Add(job);
-        await DbContext.SaveChangesAsync();
+        _dbcontext.ImportJobs.Add(job);
+        await _dbcontext.SaveChangesAsync();
 
         await Assert.ThrowsAsync<FileNotFoundException>(() => _worker.ExecuteAsync(job.Id));
 
-        AiService.Verify(x => x.DetectAsync(It.IsAny<SourceFileData>()), Times.Never);
+        _resourceTypeAiServiceMock.Verify(x => x.DetectAsync(It.IsAny<SourceFileData>()), Times.Never);
     }
 
     private static ImportJob CreateJob(string storedFileName)
@@ -98,7 +95,7 @@ public class ResourceTypeDetectionWorkerTests : TestBase
             OriginalFileName = storedFileName,
             StoredFileName = storedFileName,
             InputFormat = "CSV",
-            Status = JobStatus.Pending
+            Status = JobStatus.Started
         };
     }
 

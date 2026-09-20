@@ -2,10 +2,12 @@
 
 public enum JobStatus
 {
-    Pending,
-    Preparing,
-    AwaitingConfirmation,
-    Processing,
+    Started,
+    InProgress,
+    AiSuggestionWaiting,
+    AiSuggested,
+    ApprovalPending,
+    Approved,
     Completed,
     Failed
 }
