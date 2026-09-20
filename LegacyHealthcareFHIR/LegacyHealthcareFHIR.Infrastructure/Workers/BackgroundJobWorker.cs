@@ -4,12 +4,12 @@ using LegacyHealthcareFHIR.Infrastructure.Processors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-public class JobWorker : BackgroundService
+public class BackgroundJobWorker : BackgroundService
 {
     private readonly IBackgroundTaskQueue _queue;
     private readonly IServiceScopeFactory _scopeFactory;
 
-    public JobWorker(IBackgroundTaskQueue queue, IServiceScopeFactory scopeFactory)
+    public BackgroundJobWorker(IBackgroundTaskQueue queue, IServiceScopeFactory scopeFactory)
     {
         _queue = queue;
         _scopeFactory = scopeFactory;
@@ -37,8 +37,8 @@ public class JobWorker : BackgroundService
                 break;
 
             case JobStage.FieldMapping:
-                //var mappingProcessor = serviceProvider.GetRequiredService<FieldMappingProcessor>();
-                //await mappingProcessor.ExecuteAsync(jobId);
+                var mappingProcessor = serviceProvider.GetRequiredService<FieldMappingProcessor>();
+                await mappingProcessor.ExecuteAsync(jobId);
                 break;
 
             default:

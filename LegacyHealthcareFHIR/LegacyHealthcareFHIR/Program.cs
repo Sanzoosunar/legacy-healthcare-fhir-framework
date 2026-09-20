@@ -1,7 +1,9 @@
+using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Infrastructure.AI;
 using LegacyHealthcareFHIR.Infrastructure.Csv;
 using LegacyHealthcareFHIR.Infrastructure.Data;
+using LegacyHealthcareFHIR.Infrastructure.Processors;
 using LegacyHealthcareFHIR.Infrastructure.Queues;
 using LegacyHealthcareFHIR.Infrastructure.Repositories;
 using LegacyHealthcareFHIR.Infrastructure.Services;
@@ -41,7 +43,15 @@ builder.Services.AddSingleton(sp =>
     return new LocalFileStorageService(uploadDirectory);
 });
 
+builder.Services.AddScoped<ResourceTypeDetectionProcessor>();
+builder.Services.AddScoped<FieldMappingProcessor>();
+
+
+builder.Services.AddHostedService<BackgroundJobWorker>();
 builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+
+builder.Services.AddScoped<ResourceTypeDetectionService>();
+builder.Services.AddScoped<FieldMappingService>();
 
 var app = builder.Build();
 
@@ -52,6 +62,7 @@ using (var scope = app.Services.CreateScope())
 
     await DatabaseSeeder.SeedAsync(dbContext);
 }
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

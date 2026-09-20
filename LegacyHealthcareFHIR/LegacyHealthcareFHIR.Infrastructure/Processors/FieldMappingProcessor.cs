@@ -3,21 +3,19 @@ using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Import;
 using LegacyHealthcareFHIR.Core.Models.Mapping;
-using LegacyHealthcareFHIR.Core.Models.Notifications;
 using LegacyHealthcareFHIR.Infrastructure.Data;
 using LegacyHealthcareFHIR.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
 
-namespace LegacyHealthcareFHIR.Infrastructure.Workers;
+namespace LegacyHealthcareFHIR.Infrastructure.Processors;
 
-public class FieldMappingWorker
+public class FieldMappingProcessor
 {
     private readonly AppDbContext _dbContext;
     private readonly SourceFileService _sourceFileService;
     private readonly FieldMappingService _fieldMappingService;
     private readonly ISignalRNotifier _notifier;
 
-    public FieldMappingWorker(AppDbContext dbContext, SourceFileService sourceFileService, FieldMappingService fieldMappingService, ISignalRNotifier notifier)
+    public FieldMappingProcessor(AppDbContext dbContext, SourceFileService sourceFileService, FieldMappingService fieldMappingService, ISignalRNotifier notifier)
     {
         _dbContext = dbContext;
         _sourceFileService = sourceFileService;
