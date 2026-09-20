@@ -14,6 +14,7 @@ public class ResourceTypeDetectionProcessor
     private readonly ResourceTypeDetectionService _resourceTypeDetectionService;
     private readonly IJobRepository _jobRepo;
 
+    private readonly JobStage _currentStage = JobStage.ResourceTypeDetection;
     public ResourceTypeDetectionProcessor(
         ISignalRNotifier signalRNotifier,
         SourceFileService sourceFileService,
@@ -40,8 +41,7 @@ public class ResourceTypeDetectionProcessor
         var job = await _jobRepo.GetAsync(jobId);
 
         job.Status = JobStatus.InProgress;
-        job.JobStage = JobStage.ResourceTypeDetection;
-
+        job.JobStage = _currentStage;
         await _jobRepo.UpdateAsync(job);
 
         await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status);
@@ -57,11 +57,25 @@ public class ResourceTypeDetectionProcessor
     private async Task<ResourceTypeDetectionResult> DetectResourceTypeAsync(ImportJob job, SourceFileData sourceFileData)
     {
         await _signalRNotifier.SendAsync(job.Id, JobStage.ResourceTypeDetection, JobStatus.AiSuggestionWaiting);
+        try
+        {
+            var result = await _resourceTypeDetectionService.DetectAsync(job.HospitalId, sourceFileData);
 
-        var result = await _resourceTypeDetectionService.DetectAsync(job.HospitalId, sourceFileData);
+            job.Status = JobStatus.AiSuggested;
+            job.ResourceTypeDetectionId = result.DetectionId;
+            await _jobRepo.UpdateAsync(job);
 
-        await _signalRNotifier.SendAsync(job.Id, JobStage.ResourceTypeDetection, JobStatus.AiSuggested, result);
+            await _signalRNotifier.SendAsync(job.Id, _currentStage, job.Status, result);
 
-        return result;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            job.Status = JobStatus.Failed;
+            await _jobRepo.UpdateAsync(job);
+
+            await _signalRNotifier.SendAsync(job.Id, _currentStage, JobStatus.Failed, ex.Message);
+            throw;
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace LegacyHealthcareFHIR.Core.Models.Normalized;
 
-public class PatientData
+public class PatientData: NormalizedData
 {
     public string? PatientId { get; set; }
 

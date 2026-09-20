@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LegacyHealthcareFHIR.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260919163809_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260920074358_AddResourceTypeDetectionToImportJob")]
+    partial class AddResourceTypeDetectionToImportJob
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -167,6 +167,31 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                     b.ToTable("HospitalConfigurations");
                 });
 
+            modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.Import.SourceFileData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Headers")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ImportJobId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SampleRecords")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportJobId")
+                        .IsUnique();
+
+                    b.ToTable("SourceFileData");
+                });
+
             modelBuilder.Entity("LegacyHealthcareFHIR.Core.Models.ImportJob", b =>
                 {
                     b.Property<Guid>("Id")
@@ -192,6 +217,9 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("JobStage")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("OriginalFileName")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -199,7 +227,7 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                     b.Property<int>("ProgressPercentage")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ResourceType")
+                    b.Property<int?>("ResourceTypeDetectionId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("StartedAtUtc")
@@ -221,6 +249,8 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("HospitalId");
+
+                    b.HasIndex("ResourceTypeDetectionId");
 
                     b.ToTable("ImportJobs");
                 });
@@ -279,7 +309,7 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                     b.HasIndex("HospitalId", "SchemaFingerprint", "ResourceType")
                         .IsUnique();
 
-                    b.ToTable("MappingProfiles");
+                    b.ToTable("MappingConfigurations");
                 });
 
             modelBuilder.Entity("FieldMapping", b =>
@@ -324,6 +354,13 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                         .HasForeignKey("HospitalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("LegacyHealthcareFHIR.Core.Models.ResourceTypeDetection", "ResourceTypeDetection")
+                        .WithMany()
+                        .HasForeignKey("ResourceTypeDetectionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("ResourceTypeDetection");
                 });
 
             modelBuilder.Entity("MappingConfiguration", b =>

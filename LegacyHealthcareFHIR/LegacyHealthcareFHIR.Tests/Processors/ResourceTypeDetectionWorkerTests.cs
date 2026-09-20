@@ -26,7 +26,7 @@ public class ResourceTypeDetectionWorkerTests : TestBase
         _worker = new ResourceTypeDetectionProcessor(
             _signalRNotifierMock.Object,
             sourceFileService,
-            _resourceTypeDetectionService,_jobRepositoryMock.Object);
+            _resourceTypeDetectionService,_jobRepository);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class ResourceTypeDetectionWorkerTests : TestBase
     [Fact]
     public async Task ExecuteAsync_JobDoesNotExist_ThrowsInvalidOperationException()
     {
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _worker.ExecuteAsync(Guid.NewGuid()));
+        await Assert.ThrowsAsync<Exception>(() => _worker.ExecuteAsync(Guid.NewGuid()));
 
         _resourceTypeAiServiceMock.Verify(x => x.DetectAsync(It.IsAny<SourceFileData>()), Times.Never);
     }

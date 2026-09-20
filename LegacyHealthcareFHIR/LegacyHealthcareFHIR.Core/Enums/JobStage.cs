@@ -2,6 +2,7 @@
 
 public enum JobStage
 {
+    Created,
     ResourceTypeDetection,
     FieldMapping,
     DataValidation,

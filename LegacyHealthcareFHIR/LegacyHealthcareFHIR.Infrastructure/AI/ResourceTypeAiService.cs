@@ -13,20 +13,11 @@ namespace LegacyHealthcareFHIR.Infrastructure.AI;
 
 public class ResourceTypeAiService : IResourceTypeAiService
 {
-    private readonly ResponsesClient _client;
-    private readonly string _model;
+    private readonly IAiService _aiService;
 
-    public ResourceTypeAiService(IConfiguration configuration)
+    public ResourceTypeAiService(IAiService aiService)
     {
-        var apiKey = configuration["OpenAI:ApiKey"]
-            ?? throw new InvalidOperationException(
-                "OpenAI API key is not configured.");
-
-        _model = configuration["OpenAI:Model"]
-            ?? throw new InvalidOperationException(
-                "OpenAI model is not configured.");
-
-        _client = new ResponsesClient(apiKey);
+        _aiService = aiService;
     }
 
     public async Task<ResourceTypeDetectionAiResult> DetectAsync(
@@ -34,11 +25,7 @@ public class ResourceTypeAiService : IResourceTypeAiService
     {
         var prompt = BuildPrompt(sourceFileData);
 
-        var response = await _client.CreateResponseAsync(
-            _model,
-            prompt);
-
-        var output = response.Value.GetOutputText();
+        var output = await _aiService.GetResponseAsync(prompt);
 
         var result =
             JsonSerializer.Deserialize<AiDetectionResponse>(

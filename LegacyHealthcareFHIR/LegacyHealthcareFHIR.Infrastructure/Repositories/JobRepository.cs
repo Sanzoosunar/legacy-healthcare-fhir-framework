@@ -27,4 +27,9 @@ public class JobRepository : IJobRepository
 
         return job;
     }
+
+    public async Task<ResourceTypeDetection?> GetResourceTypeDetectionAsync(int resourceTypeId)
+    {
+        return await _dbContext.ResourceTypeDetections.FindAsync(resourceTypeId);
+    }
 }

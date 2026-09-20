@@ -41,7 +41,13 @@ public class BackgroundJobWorker : BackgroundService
                 await mappingProcessor.ExecuteAsync(jobId);
                 break;
 
+            case JobStage.DataValidation:
+                var validatorProcessor = serviceProvider.GetRequiredService<DataValidationProcessor>();
+                await validatorProcessor.ExecuteAsync(jobId);
+                break;
+
             default:
+                Console.Write("Invalid stage");
                 throw new InvalidOperationException($"Unsupported job stage: {stage}");
         }
     }

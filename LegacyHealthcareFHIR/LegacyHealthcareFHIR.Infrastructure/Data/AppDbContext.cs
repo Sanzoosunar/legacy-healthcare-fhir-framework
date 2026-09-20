@@ -134,5 +134,17 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<SourceFileData>()
             .HasIndex(x => x.ImportJobId)
             .IsUnique();
+
+        modelBuilder.Entity<ImportJob>()
+            .HasOne(x => x.ResourceTypeDetection)
+            .WithMany()
+            .HasForeignKey(x => x.ResourceTypeDetectionId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<ImportJob>()
+            .HasOne(x => x.MappingConfiguration)
+            .WithMany()
+            .HasForeignKey(x => x.MappingConfigurationId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

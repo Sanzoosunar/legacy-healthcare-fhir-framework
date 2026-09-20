@@ -1,5 +1,6 @@
 using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
+using LegacyHealthcareFHIR.Core.Mapping;
 using LegacyHealthcareFHIR.Infrastructure.AI;
 using LegacyHealthcareFHIR.Infrastructure.Csv;
 using LegacyHealthcareFHIR.Infrastructure.Data;
@@ -29,6 +30,9 @@ builder.Services.AddScoped<IJobRepository, JobRepository>();
 
 builder.Services.AddScoped<IResourceTypeAiService,ResourceTypeAiService>();
 builder.Services.AddScoped<IFieldMappingAiService, FieldMappingAiService>();
+builder.Services.AddScoped<ILegacyDataConverter, LegacyDataConverter>();
+builder.Services.AddScoped<ILegacyDataValidator, LegacyDataValidator>();
+builder.Services.AddScoped<DataValidationProcessor>();
 
 builder.Services.AddSingleton(sp =>
 {
@@ -52,6 +56,8 @@ builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
 
 builder.Services.AddScoped<ResourceTypeDetectionService>();
 builder.Services.AddScoped<FieldMappingService>();
+
+builder.Services.AddScoped<ImportsService>();
 
 var app = builder.Build();
 

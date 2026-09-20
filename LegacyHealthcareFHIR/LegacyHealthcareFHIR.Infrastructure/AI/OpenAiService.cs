@@ -13,14 +13,11 @@ public class OpenAiService : IAiService
 
     public OpenAiService(IConfiguration configuration)
     {
-        var apiKey = configuration["OpenAI:ApiKey"]
-           ?? throw new InvalidOperationException(
-               "OpenAI API key is not configured.");
+        var apiKeyEnvironmentName = configuration["OpenAI:ApiKey"];
+        var apiKey = Environment.GetEnvironmentVariable(apiKeyEnvironmentName!);
 
-        _model = configuration["OpenAI:Model"]
-            ?? throw new InvalidOperationException(
-                "OpenAI model is not configured.");
-
+        _model = configuration["OpenAI:Model"]!;
+      
         _client = new ResponsesClient(apiKey);
     }
 
