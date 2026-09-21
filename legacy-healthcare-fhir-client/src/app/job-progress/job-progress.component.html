@@ -14,7 +14,7 @@
                 <div>
                     <div class="fw-semibold">{{ item.name }}</div>
                     <div class="small" [class]="getStageClass(item.stage)">
-                        {{ getStageStatus(item.stage) }}
+                        {{ getStageStatusText(item.stage) }}
 
                         @if (getStageStatus(item.stage) === 'InProgress') {
                         <span class="spinner-border spinner-border-sm ms-1" role="status"></span>
@@ -27,6 +27,10 @@
                     @if (showFieldMappingApproval(item.stage)) {
                     <ng-container *ngTemplateOutlet="fieldMappingApproval"></ng-container>
                     }
+
+                    @if (showJobError(item.stage)) {
+                    <ng-container *ngTemplateOutlet="jobError"></ng-container>
+                    }
                 </div>
             </div>
             }
@@ -35,26 +39,41 @@
 </div>
 
 <ng-template #resourceTypeApproval>
-    <div class="mt-3">
-        <div class="row align-items-center g-2">
-            <div class="col-auto">
-                <select class="form-select form-select-sm" (change)="resourceTypeChanged($event)">
-                    <option value="Patient">Patient</option>
-                    <option value="Encounter">Encounter</option>
-                    <option value="Observation">Observation</option>
-                </select>
+    <div class="ai-suggestion-card mt-3">
+        <div class="ai-suggestion-content">
+            <div class="ai-icon">
+                ✦
             </div>
 
-            @if (showResourceTypeAiSuggested()) {
-            <div class="col-auto">
-                <span class="badge text-bg-info">
-                    AI Suggested · {{ getResourceTypeAiConfidence() }} confidence
+            <div class="ai-result">
+                <div class="ai-label">AI Suggested</div>
+                <div class="ai-resource">
+                    {{ jobBridgeService.getResourceTypeDetection()?.resourceTypeText }}
+                </div>
+            </div>
+
+            <div class="ai-confidence">
+                {{ getResourceTypeAiConfidence() }} confidence
+            </div>
+
+            <div class="ai-explanation">
+                <span class="ai-info-icon">i</span>
+                <span>
+                    Based on analysis of your data structure and field patterns,
+                    this appears to contain patient information.
                 </span>
             </div>
-            }
         </div>
+    </div>
 
-        <button class="btn btn-primary btn-sm mt-2" (click)="approveResourceType()">
+    <div class="ai-actions">
+        <select class="form-select form-select-sm resource-select" (change)="resourceTypeChanged($event)">
+            <option value="Patient">Patient</option>
+            <option value="Encounter">Encounter</option>
+            <option value="Observation">Observation</option>
+        </select>
+
+        <button class="btn btn-primary btn-sm approve-button" (click)="approveResourceType()">
             Approve
         </button>
     </div>
@@ -62,39 +81,103 @@
 
 
 <ng-template #fieldMappingApproval>
-    <div class="mt-3">
-        @for (mapping of jobBridgeService.getFieldMapping()?.mappings; track mapping.mappingId) {
-        <div class="row align-items-center g-2 mb-2">
-            <div class="col-auto">
-                <span class="fw-semibold">{{ mapping.sourceField }}</span>
+    <div class="ai-mapping-card mt-3">
+        <div class="ai-mapping-header">
+            <div class="ai-mapping-title">
+                <div class="ai-icon">✦</div>
+
+                <div>
+                    <div class="ai-label">AI Field Mapping</div>
+                    <div class="ai-title">Suggested Mappings</div>
+                </div>
             </div>
 
-            <div class="col-auto">
-                <span>→</span>
+            <div class="ai-suggestion-count">
+                {{ jobBridgeService.getFieldMapping()?.mappings?.length }} suggestions
+            </div>
+        </div>
+
+        <div class="mapping-table">
+            <div class="mapping-table-header">
+                <div>Legacy Field</div>
+                <div></div>
+                <div>Suggested Mapping</div>
+                <div>Confidence</div>
             </div>
 
-            <div class="col-auto">
-                <select class="form-select form-select-sm">
-                    @for (field of getNormalizedFields(); track field) {
-                    <option [value]="field" [selected]="field === mapping.normalizedField">
-                        {{ field }}
-                    </option>
+            @for (mapping of jobBridgeService.getFieldMapping()?.mappings; track mapping.mappingId) {
+            <div class="mapping-row">
+                <div class="source-field">
+                    {{ mapping.sourceField }}
+                </div>
+
+                <div class="mapping-arrow">
+                    →
+                </div>
+
+                <div>
+                    <select class="form-select form-select-sm mapping-select">
+                        @for (field of getNormalizedFields(); track field) {
+                        <option [value]="field" [selected]="field === mapping.normalizedField">
+                            {{ field }}
+                        </option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    @if (showFieldMappingAiSuggested(mapping.aiConfidence)) {
+                    <span class="mapping-confidence">
+                        {{ getFieldMappingAiConfidence(mapping.aiConfidence) }}
+                    </span>
                     }
-                </select>
-            </div>
-
-            @if (showFieldMappingAiSuggested(mapping.aiConfidence)) {
-            <div class="col-auto">
-                <span class="badge text-bg-info">
-                    AI Suggested · {{ getFieldMappingAiConfidence(mapping.aiConfidence) }} confidence
-                </span>
+                </div>
             </div>
             }
         </div>
-        }
 
-        <button class="btn btn-primary btn-sm mt-2" (click)="approveFieldMapping()">
-            Approve
-        </button>
+        <div class="ai-mapping-info">
+            <span class="ai-info-icon">i</span>
+
+            <span>
+                AI generated these mappings by analyzing your legacy field names and the selected FHIR resource.
+                Review or change any mapping before approval.
+            </span>
+        </div>
+    </div>
+
+    <button class="btn btn-primary btn-sm mt-3 approve-mappings-button" (click)="approveFieldMapping()">
+        Approve Mappings
+    </button>
+</ng-template>
+
+
+<ng-template #jobError>
+    <div class="job-error-panel mt-3">
+        <div class="job-error-icon">
+            !
+        </div>
+
+        <div class="job-error-content">
+            <div class="job-error-title">
+                Processing Failed
+            </div>
+
+            <div class="job-error-description">
+                The conversion could not continue because the following issues were detected:
+            </div>
+
+            @if (jobBridgeService.getErrorMessages().length > 0) {
+            <ul class="job-error-list">
+                @for (error of jobBridgeService.getErrorMessages(); track $index) {
+                <li>{{ error }}</li>
+                }
+            </ul>
+            }
+
+            <div class="job-error-help">
+                Please review the source data or configuration and correct the issues before uploading again.
+            </div>
+        </div>
     </div>
 </ng-template>

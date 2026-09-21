@@ -4,4 +4,5 @@ export interface ResourceTypeDetectionResult {
     resourceType: FhirResourceType;
     isApproved: boolean;
     aiConfidence?: number;
+    resourceTypeText?: string;
 }

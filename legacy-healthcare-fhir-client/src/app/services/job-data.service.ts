@@ -10,39 +10,36 @@ import { NormalizedFieldsResponse } from '../models/job';
   providedIn: 'root'
 })
 export class JobDataService {
+
+  private readonly baseUrl = `${backendUrl}/api/v1/imports`;
+
   constructor(private httpClient: HttpClient) {
   }
 
 
   public getNormalizedFields(): Observable<NormalizedFieldsResponse> {
-    return this.httpClient.get<NormalizedFieldsResponse>(`${backendUrl}api/imports/normalized-fields`);
+    return this.httpClient.get<NormalizedFieldsResponse>(`${this.baseUrl}/normalized-fields`);
   }
 
-  public upload(file: File): Observable<CreateJobResponse> {
-    const response: CreateJobResponse = {
-      jobId: '7a83e2c4-1d9f-4e7a-b2c1-9f8e6d3a4b2c'
-    };
 
-    return of(response).pipe(delay(1000));
+  public upload(file: File): Observable<CreateJobResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.httpClient.post<CreateJobResponse>(this.baseUrl, formData);
   }
 
   public approveResourceType(jobId: string, resourceType: FhirResourceType): Observable<ApproveResourceTypeResponse> {
-    const response: ApproveResourceTypeResponse = {
-      success: true
-    };
+    const request: ApproveResourceTypeRequest = { resourceType: resourceType }
+    return this.httpClient.post<ApproveResourceTypeResponse>(`${this.baseUrl}/${jobId}/resource-type/approve`, request);
 
-    return of(response).pipe(delay(1000));
   }
 
   public reRunJob(request: ReRunJobRequest): Observable<string> {
-    return of('Job is running in background!!').pipe(delay(1000));
+    return this.httpClient.post(`${this.baseUrl}/rerun`, request, { responseType: 'text' });
   }
 
   public approveFieldMapping(jobId: string, request: ApproveFieldMappingRequest): Observable<ApproveFieldMappingResponse> {
-    const response: ApproveFieldMappingResponse = {
-      success: true
-    };
-
-    return of(response).pipe(delay(1000));
+    return this.httpClient.post<ApproveFieldMappingResponse>(`${this.baseUrl}/${jobId}/field-mapping/approve`, request);
   }
 }

@@ -54,6 +54,7 @@ public class FhirTransformationProcessor
         job.Status = JobStatus.InProgress;
         await _jobRepo.UpdateAsync(job);
 
+        await _signalRNotifier.SendAsync(jobId, _currentStage, job.Status);
         try
         {
             using var stream = _fileStorage.OpenRead(job.StoredFileName);
@@ -71,6 +72,11 @@ public class FhirTransformationProcessor
             var normalizedData = _legacyDataConverter.Convert(resourceType, csvResult.Records, mappings);
 
             var transformedData = _normalizedDataTransformer.Transform(resourceType, normalizedData);
+
+            job.Status = JobStatus.Completed;
+            await _jobRepo.UpdateAsync(job);
+
+            await _signalRNotifier.SendAsync(jobId, _currentStage, job.Status);
         }
         catch (Exception ex)
         {

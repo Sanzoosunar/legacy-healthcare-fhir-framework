@@ -15,7 +15,7 @@ export class SignalRConnectionService {
 
   constructor() {
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`${backendUrl}hubs/import-job`)
+      .withUrl(`${backendUrl}/hubs/import-job`)
       .withAutomaticReconnect()
       .build();
 

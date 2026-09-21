@@ -9,8 +9,8 @@ import { NormalizedFieldsResponse } from '../models/job';
 @Injectable()
 export class JobBridgeService {
   private jobId?: string;
-  private jobStage: JobStage = JobStage.FieldMapping;
-  private jobStatus: JobStatus = JobStatus.AiSuggested;
+  private jobStage: JobStage = JobStage.Created;
+  private jobStatus: JobStatus = JobStatus.InProgress;
   private selectedResourceType?: FhirResourceType = FhirResourceType.Patient;
 
   public standard = 'FHIR'
@@ -48,23 +48,20 @@ export class JobBridgeService {
     return this.selectedResourceType;
   }
 
-  private resourceTypeDetection: ResourceTypeDetectionResult = {
-    aiConfidence: 0.96,
-    resourceType: FhirResourceType.Patient,
-    isApproved: false
-  };
+  private resourceTypeDetection?: ResourceTypeDetectionResult;
 
   public setResourceTypeDetection(result: ResourceTypeDetectionResult): void {
     this.resourceTypeDetection = result;
+    this.resourceTypeDetection.resourceTypeText = FhirResourceType[this.resourceTypeDetection.resourceType]
   }
 
   public getResourceTypeDetection(): ResourceTypeDetectionResult | undefined {
     return this.resourceTypeDetection;
   }
 
-  // private fieldMapping?: FieldMappingResult;
+  private fieldMapping?: FieldMappingResult;
 
-  private fieldMapping?: FieldMappingResult = {
+  private fieldMapping1?: FieldMappingResult = {
     configurationId: 1,
     isApproved: false,
     mappings: [
@@ -109,5 +106,19 @@ export class JobBridgeService {
 
   public getNormalizedFields(): NormalizedFieldsResponse | undefined {
     return this.normalizedFields;
+  }
+
+  private errorMessages: string[] = [];
+
+  public setErrorMessages(errorMessages: string[]): void {
+    this.errorMessages = errorMessages;
+  }
+
+  public getErrorMessages(): string[] {
+    return this.errorMessages;
+  }
+
+  public clearErrorMessages(): void {
+    this.errorMessages = [];
   }
 }

@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LegacyHealthcareFHIR.Web.Controllers;
 
 [ApiController]
-[Route("api/imports")]
+[Route("api/v1/imports")]
 public class ImportsController : ControllerBase
 {
     private readonly ImportsService _importsService;

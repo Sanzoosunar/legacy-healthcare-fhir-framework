@@ -1,8 +1,10 @@
+import { FhirResourceType } from "../enums/resource-type";
+
 export interface CreateJobResponse {
     jobId: string;
 }
 export interface ApproveResourceTypeRequest {
-    resourceType: string;
+    resourceType: FhirResourceType;
 }
 
 export interface ApproveResourceTypeResponse {

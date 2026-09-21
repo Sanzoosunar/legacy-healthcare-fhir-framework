@@ -4,6 +4,10 @@ import { JobBridgeService } from '../services/job-bridge.service';
 import { NgTemplateOutlet } from '@angular/common';
 import { JobDataService } from '../services/job-data.service';
 import { FhirResourceType } from '../enums/resource-type';
+import { SignalRConnectionService } from '../services/signal-r-connection.service';
+import { JobNotificationEvent } from '../models/job';
+import { ResourceTypeDetectionResult } from '../models/resource-type-detection-result';
+import { FieldMappingResult } from '../models/field-mapping-result';
 
 @Component({
   selector: 'app-job-progress',
@@ -17,17 +21,25 @@ export class JobProgressComponent {
     { stage: JobStage.FieldMapping, name: 'Field Mapping' },
     { stage: JobStage.DataValidation, name: 'Data Validation' },
     { stage: JobStage.FhirTransformation, name: 'FHIR Transformation' },
-    { stage: JobStage.FhirValidation, name: 'FHIR Validation' },
     { stage: JobStage.Completed, name: 'Completed' }
   ];
 
-  constructor(public jobBridgeService: JobBridgeService, private jobDataService: JobDataService) {
+  constructor(public jobBridgeService: JobBridgeService, private jobDataService: JobDataService,
+    private signalRConnectionService: SignalRConnectionService
+  ) {
     this.jobDataService.getNormalizedFields().subscribe({
       next: response => {
         this.jobBridgeService.setNormalizedFields(response);
       }
     });
+
+
+
+    this.signalRConnectionService.jobUpdated$.subscribe(event => {
+      this.onJobUpdated(event);
+    });
   }
+
 
   public getNormalizedFields(): string[] {
     const resourceType = this.jobBridgeService.getSelectedResourceType();
@@ -38,6 +50,17 @@ export class JobProgressComponent {
     }
 
     return normalizedFields[FhirResourceType[resourceType]] ?? [];
+  }
+
+
+  public getStageStatusText(stage: JobStage): string {
+    const status = this.getStageStatus(stage);
+
+    if (stage === JobStage.ResourceTypeDetection && status === 'AiSuggested') {
+      return 'AI analyzing your data...';
+    }
+
+    return status;
   }
 
   public getStageStatus(stage: JobStage): string {
@@ -186,5 +209,37 @@ export class JobProgressComponent {
         this.jobBridgeService.setJobStatus(JobStatus.Failed);
       }
     });
+  }
+
+  private onJobUpdated(event: JobNotificationEvent): void {
+    if (event.jobId !== this.jobBridgeService.getJobId()) {
+      return;
+    }
+
+    if (event.stage === JobStage.ResourceTypeDetection && event.data) {
+      const result = event.data as ResourceTypeDetectionResult;
+      this.jobBridgeService.setResourceTypeDetection(result);
+      this.jobBridgeService.setSelectedResourceType(result.resourceType);
+    }
+
+    else if (event.stage === JobStage.FieldMapping && event.data) {
+      const result = event.data as FieldMappingResult;
+      this.jobBridgeService.setFieldMapping(result);
+    }
+
+
+    if (event.status === JobStatus.Failed) {
+      this.jobBridgeService.setErrorMessages((event.data as string[]) ?? []);
+    } else {
+      this.jobBridgeService.clearErrorMessages();
+    }
+
+    this.jobBridgeService.setJobStage(event.stage);
+    this.jobBridgeService.setJobStatus(event.status);
+  }
+
+  public showJobError(stage: JobStage): boolean {
+    return stage === this.jobBridgeService.getJobStage() &&
+      this.jobBridgeService.getJobStatus() === JobStatus.Failed;
   }
 }
