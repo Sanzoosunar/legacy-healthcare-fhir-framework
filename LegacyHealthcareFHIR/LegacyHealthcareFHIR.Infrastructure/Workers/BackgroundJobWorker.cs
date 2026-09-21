@@ -46,6 +46,11 @@ public class BackgroundJobWorker : BackgroundService
                 await validatorProcessor.ExecuteAsync(jobId);
                 break;
 
+            case JobStage.FhirTransformation:
+                var processor = serviceProvider.GetRequiredService<FhirTransformationProcessor>();
+                await processor.ExecuteAsync(jobId);
+                break;
+
             default:
                 Console.Write("Invalid stage");
                 throw new InvalidOperationException($"Unsupported job stage: {stage}");

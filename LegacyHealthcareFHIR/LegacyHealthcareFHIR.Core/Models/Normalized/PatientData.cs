@@ -1,4 +1,6 @@
-﻿namespace LegacyHealthcareFHIR.Core.Models.Normalized;
+﻿using LegacyHealthcareFHIR.Core.Enums;
+
+namespace LegacyHealthcareFHIR.Core.Models.Normalized;
 
 public class PatientData: NormalizedData
 {
@@ -10,5 +12,5 @@ public class PatientData: NormalizedData
 
     public string? DateOfBirth { get; set; }
 
-    public string? Gender { get; set; }
+    public GenderType? Gender { get; set; }
 }

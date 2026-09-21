@@ -1,6 +1,7 @@
 using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Mapping;
+using LegacyHealthcareFHIR.Core.Transformation;
 using LegacyHealthcareFHIR.Infrastructure.AI;
 using LegacyHealthcareFHIR.Infrastructure.Csv;
 using LegacyHealthcareFHIR.Infrastructure.Data;
@@ -58,6 +59,8 @@ builder.Services.AddScoped<ResourceTypeDetectionService>();
 builder.Services.AddScoped<FieldMappingService>();
 
 builder.Services.AddScoped<ImportsService>();
+builder.Services.AddScoped<FhirTransformationProcessor>();
+builder.Services.AddScoped<INormalizedDataTransformer, FhirDataTransformer>();
 
 var app = builder.Build();
 

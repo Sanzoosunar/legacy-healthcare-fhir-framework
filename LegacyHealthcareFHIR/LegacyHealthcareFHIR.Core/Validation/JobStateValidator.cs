@@ -20,6 +20,10 @@ public static class JobStateValidator
                 (currentStage == JobStage.FieldMapping && currentStatus == JobStatus.Completed) ||
                 (currentStage == JobStage.DataValidation && currentStatus == JobStatus.Failed),
 
+            JobStage.FhirTransformation =>
+              (currentStage == JobStage.DataValidation && currentStatus == JobStatus.Completed) ||
+              (currentStage == JobStage.FhirTransformation && currentStatus == JobStatus.Failed),
+
             _ => false
         };
     }

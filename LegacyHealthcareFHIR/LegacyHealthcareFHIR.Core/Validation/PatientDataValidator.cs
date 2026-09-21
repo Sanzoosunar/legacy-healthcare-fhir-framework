@@ -48,9 +48,9 @@ public static class PatientDataValidator
                 rowIsValid = false;
             }
 
-            if (string.IsNullOrWhiteSpace(patient.Gender))
+            if (patient.Gender == null)
             {
-                AddError(result, rowNumber, nameof(PatientData.Gender), patient.Gender, "Gender is required");
+                AddError(result, rowNumber, nameof(PatientData.Gender), patient.Gender.ToString(), "Gender is required");
                 rowIsValid = false;
             }
 

@@ -19,6 +19,11 @@ public class JobStateValidatorTests
     [InlineData(JobStage.Created, JobStatus.Completed, JobStage.DataValidation, false)]
     [InlineData(JobStage.ResourceTypeDetection, JobStatus.Completed, JobStage.DataValidation, false)]
     [InlineData(JobStage.DataValidation, JobStatus.Completed, JobStage.DataValidation, false)]
+
+    [InlineData(JobStage.DataValidation, JobStatus.Completed, JobStage.FhirTransformation, true)]
+    [InlineData(JobStage.FhirTransformation, JobStatus.Failed, JobStage.FhirTransformation, true)]
+    [InlineData(JobStage.DataValidation, JobStatus.Failed, JobStage.FhirTransformation, false)]
+    [InlineData(JobStage.FhirTransformation, JobStatus.Completed, JobStage.FhirTransformation, false)]
     public void IsValid_ReturnsExpectedResult(JobStage currentStage, JobStatus currentStatus, JobStage targetStage, bool expected)
     {
         var result = JobStateValidator.IsValid(currentStage, currentStatus, targetStage);

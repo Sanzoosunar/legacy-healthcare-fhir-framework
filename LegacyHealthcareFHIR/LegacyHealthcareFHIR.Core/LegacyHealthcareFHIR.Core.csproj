@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Transformation\" />
+    <PackageReference Include="Hl7.Fhir.R4" Version="6.5.0" />
   </ItemGroup>
 
 </Project>

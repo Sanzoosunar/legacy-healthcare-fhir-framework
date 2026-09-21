@@ -51,7 +51,7 @@ public class ImportsController : ControllerBase
 
 
     [HttpPost("rerun")]
-    public async Task<IActionResult> ReRunJob(BackgroundTaskMessage message)
+    public async Task<IActionResult> ReRunJob([FromBody] BackgroundTaskMessage message)
     {
         await _queue.EnqueueAsync(message.Stage, message.JobId);
         return Ok("Job is running in background!!");
