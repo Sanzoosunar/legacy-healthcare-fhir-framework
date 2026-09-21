@@ -22,6 +22,19 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 builder.Services.AddSignalR();
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularClient", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 builder.Services.AddSingleton<IAiService, OpenAiService>();
 builder.Services.AddScoped<ISignalRNotifier, SignalRNotifier>();
 builder.Services.AddScoped<LegacyCsvReader>();
@@ -63,7 +76,7 @@ builder.Services.AddScoped<FhirTransformationProcessor>();
 builder.Services.AddScoped<INormalizedDataTransformer, FhirDataTransformer>();
 
 var app = builder.Build();
-
+app.UseCors("AngularClient");
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider
@@ -72,6 +85,16 @@ using (var scope = app.Services.CreateScope())
     await DatabaseSeeder.SeedAsync(dbContext);
 }
 
+app.MapGet("/test-signalr", async (ISignalRNotifier notifier) =>
+{
+    await notifier.SendAsync(
+        Guid.NewGuid(),
+        JobStage.ResourceTypeDetection,
+        JobStatus.InProgress,
+        new { Message = "SignalR test notification" });
+
+    return Results.Ok();
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -93,6 +116,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-app.MapHub<SignalRHub>("/notifications/fhir-integration");
+app.MapHub<SignalRHub>("/hubs/import-job");
 
 app.Run();

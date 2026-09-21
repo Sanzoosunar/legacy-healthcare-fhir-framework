@@ -2,12 +2,9 @@
 
 public enum JobStatus
 {
-    Started,
-    InProgress,
-    AiSuggestionWaiting,
-    AiSuggested,
-    ApprovalPending,
-    Approved,
-    Completed,
-    Failed
+    Started = 0,
+    InProgress = 1,
+    AiSuggested = 2,
+    Completed = 3,
+    Failed = 4
 }

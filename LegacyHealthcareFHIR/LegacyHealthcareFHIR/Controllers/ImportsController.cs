@@ -1,7 +1,9 @@
-﻿using LegacyHealthcareFHIR.Core.Enums;
+﻿using Hl7.Fhir.Model;
+using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Import;
+using LegacyHealthcareFHIR.Core.Models.Normalized;
 using LegacyHealthcareFHIR.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -62,5 +64,18 @@ public class ImportsController : ControllerBase
     {
         await _importsService.ApproveFieldMappingAsync(jobId, request);
         return Ok();
+    }
+
+    [HttpGet("normalized-fields")]
+    public IActionResult GetNormalizedFields()
+    {
+        var fields = new Dictionary<FhirResourceType, List<string>>
+        {
+            [FhirResourceType.Patient] = typeof(PatientData).GetProperties().Select(x => x.Name).ToList(),
+            [FhirResourceType.Encounter] = typeof(Encounter).GetProperties().Select(x => x.Name).ToList(),
+            [FhirResourceType.Observation] = typeof(Observation).GetProperties().Select(x => x.Name).ToList(),
+        };
+
+        return Ok(fields);
     }
 }
