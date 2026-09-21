@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LegacyHealthcareFHIR.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddResourceTypeDetectionToImportJob : Migration
+    public partial class initital_db : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -136,14 +136,9 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                     InputFormat = table.Column<string>(type: "TEXT", nullable: false),
                     ResourceTypeDetectionId = table.Column<int>(type: "INTEGER", nullable: true),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    MappingConfigurationId = table.Column<int>(type: "INTEGER", nullable: true),
                     JobStage = table.Column<int>(type: "INTEGER", nullable: false),
-                    ProgressPercentage = table.Column<int>(type: "INTEGER", nullable: false),
-                    TotalRecords = table.Column<int>(type: "INTEGER", nullable: false),
-                    SuccessfulRecords = table.Column<int>(type: "INTEGER", nullable: false),
-                    FailedRecords = table.Column<int>(type: "INTEGER", nullable: false),
-                    ErrorMessage = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    StartedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CompletedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -155,6 +150,12 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                         principalTable: "Hospitals",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ImportJobs_MappingConfigurations_MappingConfigurationId",
+                        column: x => x.MappingConfigurationId,
+                        principalTable: "MappingConfigurations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_ImportJobs_ResourceTypeDetections_ResourceTypeDetectionId",
                         column: x => x.ResourceTypeDetectionId,
@@ -234,6 +235,11 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                 column: "HospitalId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ImportJobs_MappingConfigurationId",
+                table: "ImportJobs",
+                column: "MappingConfigurationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ImportJobs_ResourceTypeDetectionId",
                 table: "ImportJobs",
                 column: "ResourceTypeDetectionId");
@@ -276,10 +282,10 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                 name: "ImportJobs");
 
             migrationBuilder.DropTable(
-                name: "MappingConfigurations");
+                name: "Hospitals");
 
             migrationBuilder.DropTable(
-                name: "Hospitals");
+                name: "MappingConfigurations");
 
             migrationBuilder.DropTable(
                 name: "ResourceTypeDetections");

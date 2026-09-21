@@ -74,8 +74,6 @@ public class FieldMappingProcessor
 
     private async Task<FieldMappingResult> GetAiSuggestedFieldMappingAsync(ImportJob job, FhirResourceType resourceType ,SourceFileData sourceFileData)
     {
-        await _notifier.SendAsync(sourceFileData.ImportJobId, JobStage.FieldMapping, JobStatus.AiSuggestionWaiting);
-
         var aiSuggestedFields =  await _fieldMappingService.GetOrCreateAsync(job.HospitalId, resourceType , sourceFileData);
 
         job.MappingConfigurationId = aiSuggestedFields.ConfigurationId;

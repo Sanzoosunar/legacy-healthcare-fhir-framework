@@ -56,7 +56,6 @@ public class ResourceTypeDetectionProcessor
 
     private async Task<ResourceTypeDetectionResult> DetectResourceTypeAsync(ImportJob job, SourceFileData sourceFileData)
     {
-        await _signalRNotifier.SendAsync(job.Id, JobStage.ResourceTypeDetection, JobStatus.AiSuggestionWaiting);
         try
         {
             var result = await _resourceTypeDetectionService.DetectAsync(job.HospitalId, sourceFileData);

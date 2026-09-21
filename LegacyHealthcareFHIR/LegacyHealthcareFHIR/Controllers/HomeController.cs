@@ -13,6 +13,11 @@ namespace LegacyHealthcareFHIR.Controllers
         {
             _signalRNotifier = signalRNotifier;
         }
+
+        public ActionResult Test()
+        {
+            return Ok("testing success");
+        }
         public IActionResult Index()
         {
             return View();
