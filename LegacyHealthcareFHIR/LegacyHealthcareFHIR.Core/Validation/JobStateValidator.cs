@@ -24,6 +24,10 @@ public static class JobStateValidator
               (currentStage == JobStage.DataValidation && currentStatus == JobStatus.Completed) ||
               (currentStage == JobStage.FhirTransformation && currentStatus == JobStatus.Failed),
 
+            JobStage.Completed =>
+               (currentStage == JobStage.FhirTransformation && currentStatus == JobStatus.Completed) ||
+               (currentStage == JobStage.Completed && currentStatus == JobStatus.Failed),
+
             _ => false
         };
     }

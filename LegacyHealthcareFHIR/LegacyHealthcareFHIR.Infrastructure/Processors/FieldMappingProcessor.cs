@@ -4,24 +4,22 @@ using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Import;
 using LegacyHealthcareFHIR.Core.Models.Mapping;
 using LegacyHealthcareFHIR.Core.Validation;
-using LegacyHealthcareFHIR.Infrastructure.Data;
 using LegacyHealthcareFHIR.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace LegacyHealthcareFHIR.Infrastructure.Processors;
 
-public class FieldMappingProcessor
+public class FieldMappingProcessor : IJobProcessor
 {
     private readonly IJobRepository _jobRepo;
     private readonly SourceFileService _sourceFileService;
     private readonly FieldMappingService _fieldMappingService;
     private readonly ISignalRNotifier _notifier;
-    private readonly AppDbContext _dbContext;
-
-    private readonly JobStage _currentStage = JobStage.FieldMapping;
-    public FieldMappingProcessor(AppDbContext dbContext, IJobRepository jobRepo, SourceFileService sourceFileService, FieldMappingService fieldMappingService, ISignalRNotifier notifier)
+    public JobStage _currentStage => JobStage.FieldMapping;
+    public FieldMappingProcessor(IJobRepository jobRepo, 
+        SourceFileService sourceFileService, 
+        FieldMappingService fieldMappingService, 
+        ISignalRNotifier notifier)
     {
-        _dbContext = dbContext;
         _jobRepo = jobRepo;
         _sourceFileService = sourceFileService;
         _fieldMappingService = fieldMappingService;
@@ -38,19 +36,13 @@ public class FieldMappingProcessor
 
     public async Task ExecuteAsync(Guid jobId)
     {
-        var job = await _dbContext.ImportJobs
-          .Include(x => x.ResourceTypeDetection)
-          .FirstOrDefaultAsync(x => x.Id == jobId) ?? throw new Exception("job not found");
-
+        var job = await _jobRepo.GetWithDetails(jobId);
         ValidateJob(job);
 
         try
         {
-            job.JobStage = _currentStage;
-            job.Status = JobStatus.InProgress;
-            await _jobRepo.UpdateAsync(job);
+            await _jobRepo.UpdateStageAndStatus(jobId,_currentStage,JobStatus.InProgress);
             await _notifier.SendAsync(jobId, JobStage.FieldMapping, JobStatus.InProgress);
-
 
             var detection = job.ResourceTypeDetection;
             var sourceFileData = await GetHeaderAndSampleDataAsync(job);
@@ -59,10 +51,7 @@ public class FieldMappingProcessor
         }
         catch(Exception ex)
         {
-            job.JobStage = _currentStage;
-            job.Status = JobStatus.Failed;
-            await _jobRepo.UpdateAsync(job);
-
+            await _jobRepo.UpdateStageAndStatus(jobId, _currentStage, JobStatus.Failed);
             await _notifier.SendAsync(jobId, _currentStage, JobStatus.Failed,ex.Message);
         }
     }

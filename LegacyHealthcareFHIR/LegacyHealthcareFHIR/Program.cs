@@ -1,4 +1,3 @@
-using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Mapping;
 using LegacyHealthcareFHIR.Core.Transformation;
@@ -14,8 +13,11 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -66,6 +68,12 @@ builder.Services.AddScoped<FieldMappingProcessor>();
 
 
 builder.Services.AddHostedService<BackgroundJobWorker>();
+builder.Services.AddScoped<IJobProcessor, ResourceTypeDetectionProcessor>();
+builder.Services.AddScoped<IJobProcessor, FieldMappingProcessor>();
+builder.Services.AddScoped<IJobProcessor, DataValidationProcessor>();
+builder.Services.AddScoped<IJobProcessor, FhirTransformationProcessor>();
+builder.Services.AddScoped<IJobProcessor, CompletedProcessor>();
+
 builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
 
 builder.Services.AddScoped<ResourceTypeDetectionService>();
@@ -77,6 +85,8 @@ builder.Services.AddScoped<INormalizedDataTransformer, FhirDataTransformer>();
 
 var app = builder.Build();
 app.UseCors("AngularClient");
+
+
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider
@@ -85,23 +95,11 @@ using (var scope = app.Services.CreateScope())
     await DatabaseSeeder.SeedAsync(dbContext);
 }
 
-app.MapGet("/test-signalr", async (ISignalRNotifier notifier) =>
-{
-    await notifier.SendAsync(
-        Guid.NewGuid(),
-        JobStage.ResourceTypeDetection,
-        JobStatus.InProgress,
-        new { Message = "SignalR test notification" });
 
-    return Results.Ok();
-});
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
@@ -109,12 +107,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
 
 app.MapHub<SignalRHub>("/hubs/import-job");
 
