@@ -1,6 +1,5 @@
 ﻿using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
-using LegacyHealthcareFHIR.Infrastructure.Processors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -23,37 +22,12 @@ public class BackgroundJobWorker : BackgroundService
 
             using var scope = _scopeFactory.CreateScope();
 
-            await ProcessAsync(scope.ServiceProvider, message.Stage, message.JobId);
-        }
-    }
+            var processor = scope.ServiceProvider
+                                .GetServices<IJobProcessor>()
+                                .FirstOrDefault(x => x._currentStage == message.Stage)
+                                ?? throw new InvalidOperationException($"No processor registered for stage: {message.Stage}");
 
-    private static async Task ProcessAsync(IServiceProvider serviceProvider, JobStage stage, Guid jobId)
-    {
-        switch (stage)
-        {
-            case JobStage.ResourceTypeDetection:
-                var detectionProcessor = serviceProvider.GetRequiredService<ResourceTypeDetectionProcessor>();
-                await detectionProcessor.ExecuteAsync(jobId);
-                break;
-
-            case JobStage.FieldMapping:
-                var mappingProcessor = serviceProvider.GetRequiredService<FieldMappingProcessor>();
-                await mappingProcessor.ExecuteAsync(jobId);
-                break;
-
-            case JobStage.DataValidation:
-                var validatorProcessor = serviceProvider.GetRequiredService<DataValidationProcessor>();
-                await validatorProcessor.ExecuteAsync(jobId);
-                break;
-
-            case JobStage.FhirTransformation:
-                var processor = serviceProvider.GetRequiredService<FhirTransformationProcessor>();
-                await processor.ExecuteAsync(jobId);
-                break;
-
-            default:
-                Console.Write("Invalid stage");
-                throw new InvalidOperationException($"Unsupported job stage: {stage}");
+            await processor.ExecuteAsync(message.JobId);
         }
     }
 }

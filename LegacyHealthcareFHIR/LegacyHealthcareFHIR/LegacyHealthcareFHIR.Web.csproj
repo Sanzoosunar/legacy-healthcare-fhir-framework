@@ -12,15 +12,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LegacyHealthcareFHIR.Core\LegacyHealthcareFHIR.Core.csproj" />
     <ProjectReference Include="..\LegacyHealthcareFHIR.Infrastructure\LegacyHealthcareFHIR.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="App_Data\Uploads\" />
   </ItemGroup>
 
 </Project>

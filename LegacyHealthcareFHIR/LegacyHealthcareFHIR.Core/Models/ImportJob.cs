@@ -22,4 +22,6 @@ public class ImportJob
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public DateTime? CompletedAtUtc { get; set; }
+
+    public string? OutputFileName {  get; set; }
 }

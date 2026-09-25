@@ -28,4 +28,16 @@
 
         return File.OpenRead(filePath);
     }
+
+    public Task Remove(string fileName)
+    {
+        var filePath = Path.Combine(_uploadDirectory, fileName);
+
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
+
+        return Task.CompletedTask;
+    }
 }
