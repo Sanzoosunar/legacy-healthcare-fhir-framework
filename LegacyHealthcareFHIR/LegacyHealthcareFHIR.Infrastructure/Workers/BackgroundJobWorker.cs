@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 
 public class BackgroundJobWorker : BackgroundService
 {
-    private readonly IBackgroundTaskQueue _queue;
+    private readonly IBackgroundTaskQueue _queue; 
     private readonly IServiceScopeFactory _scopeFactory;
 
     public BackgroundJobWorker(IBackgroundTaskQueue queue, IServiceScopeFactory scopeFactory)
