@@ -1,9 +1,10 @@
 using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Mapping;
 using LegacyHealthcareFHIR.Core.Transformation;
+using LegacyHealthcareFHIR.Infrastructure;
 using LegacyHealthcareFHIR.Infrastructure.AI;
-using LegacyHealthcareFHIR.Infrastructure.Csv;
 using LegacyHealthcareFHIR.Infrastructure.Data;
+using LegacyHealthcareFHIR.Infrastructure.LegacyReader;
 using LegacyHealthcareFHIR.Infrastructure.Processors;
 using LegacyHealthcareFHIR.Infrastructure.Queues;
 using LegacyHealthcareFHIR.Infrastructure.Repositories;
@@ -39,8 +40,12 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSingleton<IAiService, OpenAiService>();
 builder.Services.AddScoped<ISignalRNotifier, SignalRNotifier>();
-builder.Services.AddScoped<LegacyCsvReader>();
+
+builder.Services.AddScoped<FileReadingService>();
 builder.Services.AddScoped<SourceFileService>();
+builder.Services.AddScoped<ServiceFactory>();
+builder.Services.AddScoped<IFileContentReader, CsvFileContentReader>();
+builder.Services.AddScoped<IFileContentReader, PdfFileContentReader>();
 
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 

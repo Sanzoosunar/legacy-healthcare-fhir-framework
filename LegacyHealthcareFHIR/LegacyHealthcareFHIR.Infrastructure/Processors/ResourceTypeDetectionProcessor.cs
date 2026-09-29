@@ -48,7 +48,7 @@ public class ResourceTypeDetectionProcessor: IJobProcessor
 
     private async Task<SourceFileData> ReadSourceFileAsync(ImportJob job)
     {
-        return await _sourceFileService.ReadAndSaveAsync(job.Id, job.StoredFileName);
+        return await _sourceFileService.ReadAndSaveAsync(job.Id, job.StoredFileName,job.InputFormat);
     }
 
     private async Task<ResourceTypeDetectionResult> DetectResourceTypeAsync(ImportJob job, SourceFileData sourceFileData)

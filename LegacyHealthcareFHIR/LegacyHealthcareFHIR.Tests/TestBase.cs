@@ -1,6 +1,6 @@
 ﻿using LegacyHealthcareFHIR.Core.Interfaces;
-using LegacyHealthcareFHIR.Infrastructure.Csv;
 using LegacyHealthcareFHIR.Infrastructure.Data;
+using LegacyHealthcareFHIR.Infrastructure.LegacyReader;
 using LegacyHealthcareFHIR.Infrastructure.Repositories;
 using LegacyHealthcareFHIR.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +31,7 @@ public abstract class TestBase : IAsyncLifetime
 
     protected readonly Mock<ILegacyDataConverter> _legacyDataConverterMock;
     protected readonly Mock<ILegacyDataValidator> _legacyDataValidatorMock;
-    protected readonly LegacyCsvReader _csvReader;
+    protected readonly LegacyCsvReaderService _csvReader;
     protected readonly string _uploadDirectory;
     protected readonly LocalFileStorageService _fileStorage;
     protected TestBase()
@@ -59,7 +59,7 @@ public abstract class TestBase : IAsyncLifetime
 
         _legacyDataConverterMock = new Mock<ILegacyDataConverter>();
         _legacyDataValidatorMock = new Mock<ILegacyDataValidator>();
-        _csvReader = new LegacyCsvReader();
+        _csvReader = new LegacyCsvReaderService();
 
         _uploadDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(_uploadDirectory);

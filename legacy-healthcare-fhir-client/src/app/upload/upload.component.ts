@@ -18,6 +18,7 @@ export class UploadComponent {
   public isConvertBtnEnabled = false;
   public selectedFile?: File;
 
+  public acceptedFileTypes = '.csv,.pdf,.hl7,.xml';
   constructor(
     private jobDataService: JobDataService,
     public jobBridgeService: JobBridgeService

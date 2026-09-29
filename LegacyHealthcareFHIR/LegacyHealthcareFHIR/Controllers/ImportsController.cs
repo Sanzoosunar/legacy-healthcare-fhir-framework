@@ -34,8 +34,7 @@ public class ImportsController : ControllerBase
         var hospitalId = 1;
 
         await using var stream = file.OpenReadStream();
-
-        var job = await _importsService.CreateImportJob(stream, file.FileName, hospitalId, "CSV");
+        var job = await _importsService.CreateImportJob(stream, file.FileName, hospitalId);
 
         return Accepted(new
         {

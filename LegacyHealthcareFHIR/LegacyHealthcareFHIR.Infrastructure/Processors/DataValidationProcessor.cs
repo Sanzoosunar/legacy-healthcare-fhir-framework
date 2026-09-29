@@ -2,31 +2,29 @@
 using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Validation;
-using LegacyHealthcareFHIR.Infrastructure.Csv;
+using LegacyHealthcareFHIR.Infrastructure.LegacyReader;
+using LegacyHealthcareFHIR.Infrastructure.Services;
 
 namespace LegacyHealthcareFHIR.Infrastructure.Processors;
 
 public class DataValidationProcessor: IJobProcessor
 {
     private readonly IJobRepository _jobRepo;
-    private readonly LocalFileStorageService _fileStorage;
-    private readonly LegacyCsvReader _csvReader;
+    private readonly FileReadingService _fileReadingService;
     private readonly ILegacyDataConverter _legacyDataConverter;
     private readonly ILegacyDataValidator _legacyDataValidator;
     private readonly IBackgroundTaskQueue _queue;
     private readonly ISignalRNotifier _signalRNotifier;
     public JobStage _currentStage => JobStage.DataValidation;
-    public DataValidationProcessor(IJobRepository jobRepo, 
-        LocalFileStorageService fileStorage, 
-        LegacyCsvReader csvReader, 
+    public DataValidationProcessor(IJobRepository jobRepo,
+        FileReadingService fileReadingService,
         ILegacyDataConverter legacyDataConverter,
         ILegacyDataValidator legacyDataValidator, 
         IBackgroundTaskQueue queue, 
         ISignalRNotifier signalRNotifier)
     {
         _jobRepo = jobRepo;
-        _fileStorage = fileStorage;
-        _csvReader = csvReader;
+        _fileReadingService = fileReadingService;
         _legacyDataConverter = legacyDataConverter;
         _legacyDataValidator = legacyDataValidator;
         _queue = queue;
@@ -49,13 +47,11 @@ public class DataValidationProcessor: IJobProcessor
 
         try
         {
-            using var stream = _fileStorage.OpenRead(job.StoredFileName);
+            var result = _fileReadingService.Read(job.StoredFileName, job.InputFormat);
 
-            var csvResult = _csvReader.Read(stream);
+            if (!result.Success) throw new Exception("failed to read source file");
 
-            if (!csvResult.IsSuccess) throw new Exception("failed to read source file");
-
-            var legacyData = csvResult.Records;
+            var legacyData = result.Records;
 
             var normalizedData = _legacyDataConverter.Convert(resourceType, legacyData, mappings);
 
