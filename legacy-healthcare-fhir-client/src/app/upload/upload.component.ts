@@ -113,16 +113,13 @@ export class UploadComponent {
 
   public onConvertBtnClick(): void {
     this.isConvertBtnEnabled = false;
-    debugger;
     this.jobDataService.upload(this.selectedFile!).subscribe({
       next: response => {
-        debugger;
         this.jobBridgeService.setJobId(response.jobId);
         this.jobBridgeService.setJobStage(JobStage.ResourceTypeDetection)
         this.jobBridgeService.setJobStatus(JobStatus.InProgress)
       },
       error: () => {
-        debugger;
         this.isConvertBtnEnabled = true;
       }
     });

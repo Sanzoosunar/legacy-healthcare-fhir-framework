@@ -42,7 +42,6 @@ export class JobProgressComponent {
       jobId: this.jobBridgeService.getJobId()!
     }
 
-    alert(this.jobBridgeService.getSelectedResourceType())
     this.jobDataService.getNormalizedFields().subscribe({
       next: response => {
         this.jobBridgeService.setNormalizedFields(response);
@@ -141,7 +140,6 @@ export class JobProgressComponent {
 
   public resourceTypeChanged(resourceType: FhirResourceType): void {
     this.jobBridgeService.setSelectedResourceType(resourceType);
-    alert(this.jobBridgeService.getSelectedResourceType())
   }
 
   public approveResourceType(): void {
@@ -229,7 +227,6 @@ export class JobProgressComponent {
     }
 
     if (event.stage === JobStage.ResourceTypeDetection && event.data) {
-      debugger;
       const result = event.data as ResourceTypeDetectionResult;
       this.jobBridgeService.setResourceTypeDetection(result);
       this.jobBridgeService.setSelectedResourceType(result.resourceType);
