@@ -5,8 +5,9 @@ using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Transformed;
 using LegacyHealthcareFHIR.Core.Transformation;
 using LegacyHealthcareFHIR.Core.Validation;
-using LegacyHealthcareFHIR.Infrastructure.Csv;
 using LegacyHealthcareFHIR.Infrastructure.Data;
+using LegacyHealthcareFHIR.Infrastructure.LegacyReader;
+using LegacyHealthcareFHIR.Infrastructure.Services;
 using Task = System.Threading.Tasks.Task;
 
 namespace LegacyHealthcareFHIR.Infrastructure.Processors;
@@ -16,24 +17,21 @@ public class FhirTransformationProcessor: IJobProcessor
     private readonly IJobRepository _jobRepo;
     private readonly IBackgroundTaskQueue _queue;
     private readonly ISignalRNotifier _signalRNotifier;
-    private readonly LocalFileStorageService _fileStorage;
-    private readonly LegacyCsvReader _csvReader;
+    private readonly FileReadingService _fileReadingService;
     private readonly ILegacyDataConverter _legacyDataConverter;
     private readonly INormalizedDataTransformer _normalizedDataTransformer;
     public JobStage _currentStage => JobStage.FhirTransformation;
 
     public FhirTransformationProcessor(
         IJobRepository jobRepo,
-        LocalFileStorageService fileStorage,
-        LegacyCsvReader csvReader,
+        FileReadingService fileReadingService,
         ILegacyDataConverter legacyDataConverter,
         INormalizedDataTransformer normalizedDataTransformer,
         IBackgroundTaskQueue queue,
         ISignalRNotifier signalRNotifier)
     {
         _jobRepo = jobRepo;
-        _fileStorage = fileStorage;
-        _csvReader = csvReader;
+       _fileReadingService = fileReadingService;
         _legacyDataConverter = legacyDataConverter;
         _normalizedDataTransformer = normalizedDataTransformer;
         _queue = queue;
@@ -52,11 +50,9 @@ public class FhirTransformationProcessor: IJobProcessor
         await _signalRNotifier.SendAsync(jobId, _currentStage, job.Status);
         try
         {
-            using var stream = _fileStorage.OpenRead(job.StoredFileName);
+            var result = _fileReadingService.Read(job.StoredFileName,job.InputFormat);
 
-            var csvResult = _csvReader.Read(stream);
-
-            if (!csvResult.IsSuccess) throw new Exception("failed to read source file");
+            if (!result.Success) throw new Exception("failed to read source file");
 
             var resourceType = job.ResourceTypeDetection!.ResourceType;
 
@@ -64,7 +60,7 @@ public class FhirTransformationProcessor: IJobProcessor
                 .Where(x => !string.IsNullOrWhiteSpace(x.NormalizedField))
                 .ToDictionary(x => x.SourceField, x => x.NormalizedField!);
 
-            var normalizedData = _legacyDataConverter.Convert(resourceType, csvResult.Records, mappings);
+            var normalizedData = _legacyDataConverter.Convert(resourceType, result.Records, mappings);
 
             var transformedData = _normalizedDataTransformer.Transform(resourceType, normalizedData);
 
@@ -82,7 +78,7 @@ public class FhirTransformationProcessor: IJobProcessor
             var bytes = System.Text.Encoding.UTF8.GetBytes(json);
             using var jsonStream = new MemoryStream(bytes);
 
-            await _fileStorage.SaveAsync(jsonStream,outputFileName);
+            await _fileReadingService.SaveFile(jsonStream,outputFileName);
 
             job.Status = JobStatus.Completed;
             job.OutputFileName = outputFileName;

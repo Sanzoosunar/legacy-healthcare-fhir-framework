@@ -16,16 +16,15 @@ public class ImportsService
         _queue = queue;
         _jobRepository = jobRepository;
     }
-    public async Task<ImportJob> CreateImportJob(Stream fileStream, string originalFileName, int hospitalId, string inputFormat)
+    public async Task<ImportJob> CreateImportJob(Stream fileStream, string originalFileName, int hospitalId)
     {
-        var extension = Path.GetExtension(originalFileName);
+        var extension = Path.GetExtension(originalFileName).TrimStart('.').ToUpperInvariant();
         var storedFileName = $"{DateTime.UtcNow:yyyyMMdd_HHmmssfff}{extension}";
 
-        var job = await _jobRepository.AddNewJob(hospitalId, originalFileName, storedFileName, inputFormat);
-
+        var job = await _jobRepository.AddNewJob(hospitalId, originalFileName, storedFileName, extension);
         await _fileStorage.SaveAsync(fileStream, storedFileName);
-        await _queue.EnqueueAsync(JobStage.ResourceTypeDetection, job.Id);
 
+        await _queue.EnqueueAsync(JobStage.ResourceTypeDetection, job.Id);
         return job;
     }
     public async Task<bool> ApproveResourceTypeAsync(Guid jobId, FhirResourceType resourceType)

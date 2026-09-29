@@ -61,7 +61,7 @@ public class FieldMappingProcessor : IJobProcessor
 
     private async Task<SourceFileData> GetHeaderAndSampleDataAsync(ImportJob job)
     {
-        return await _sourceFileService.GetOrCreate(job.Id, job.StoredFileName);
+        return await _sourceFileService.GetOrCreate(job.Id, job.StoredFileName,job.InputFormat);
     }
 
     private async Task<FieldMappingResult> GetAiSuggestedFieldMappingAsync(ImportJob job, FhirResourceType resourceType ,SourceFileData sourceFileData)
