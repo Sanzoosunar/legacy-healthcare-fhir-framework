@@ -5,13 +5,14 @@ import { NgTemplateOutlet } from '@angular/common';
 import { JobDataService } from '../services/job-data.service';
 import { FhirResourceType } from '../enums/resource-type';
 import { SignalRConnectionService } from '../services/signal-r-connection.service';
-import { JobNotificationEvent } from '../models/job';
+import { ImportJob, JobNotificationEvent, ProcessedJob } from '../models/job';
 import { ResourceTypeDetectionResult } from '../models/resource-type-detection-result';
 import { FieldMappingResult } from '../models/field-mapping-result';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-job-progress',
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, FormsModule],
   templateUrl: './job-progress.component.html',
   styleUrl: './job-progress.component.css'
 })
@@ -24,16 +25,28 @@ export class JobProgressComponent {
     { stage: JobStage.Completed, name: 'Completed' }
   ];
 
+  public FhirResourceType = FhirResourceType;
+
+  public resourceTypes = [
+    FhirResourceType.Patient,
+    FhirResourceType.Encounter,
+    FhirResourceType.Observation
+  ];
+
+  public processedJob!: ProcessedJob;
+
   constructor(public jobBridgeService: JobBridgeService, private jobDataService: JobDataService,
     private signalRConnectionService: SignalRConnectionService
   ) {
+    this.processedJob = {
+      jobId: this.jobBridgeService.getJobId()!
+    }
+
     this.jobDataService.getNormalizedFields().subscribe({
       next: response => {
         this.jobBridgeService.setNormalizedFields(response);
       }
     });
-
-
 
     this.signalRConnectionService.jobUpdated$.subscribe(event => {
       this.onJobUpdated(event);
@@ -125,10 +138,7 @@ export class JobProgressComponent {
       this.jobBridgeService.getJobStatus() === JobStatus.AiSuggested;
   }
 
-  public resourceTypeChanged(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    const resourceType = FhirResourceType[select.value as keyof typeof FhirResourceType];
-
+  public resourceTypeChanged(resourceType: FhirResourceType): void {
     this.jobBridgeService.setSelectedResourceType(resourceType);
   }
 
@@ -226,12 +236,15 @@ export class JobProgressComponent {
       const result = event.data as FieldMappingResult;
       this.jobBridgeService.setFieldMapping(result);
     }
+    else if (event.stage === JobStage.Completed) {
+      const result = event.data as string;
+      this.processedJob.outputFileName = result
+    }
 
 
+    this.jobBridgeService.clearErrorMessages();
     if (event.status === JobStatus.Failed) {
       this.jobBridgeService.setErrorMessages((event.data as string[]) ?? []);
-    } else {
-      this.jobBridgeService.clearErrorMessages();
     }
 
     this.jobBridgeService.setJobStage(event.stage);
@@ -241,5 +254,9 @@ export class JobProgressComponent {
   public showJobError(stage: JobStage): boolean {
     return stage === this.jobBridgeService.getJobStage() &&
       this.jobBridgeService.getJobStatus() === JobStatus.Failed;
+  }
+
+  public stringify(value: unknown): string {
+    return JSON.stringify(value, null, 2);
   }
 }

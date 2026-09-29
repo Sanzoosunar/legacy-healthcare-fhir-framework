@@ -107,6 +107,7 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+app.MapControllers();
 
 app.MapHub<SignalRHub>("/hubs/import-job");
 
