@@ -35,6 +35,9 @@
             </div>
             }
         </div>
+        <div>
+            <pre>{{stringify(processedJob!)}}</pre>
+        </div>
     </div>
 </div>
 
@@ -67,12 +70,15 @@
     </div>
 
     <div class="ai-actions">
-        <select class="form-select form-select-sm resource-select" (change)="resourceTypeChanged($event)">
-            <option value="Patient">Patient</option>
-            <option value="Encounter">Encounter</option>
-            <option value="Observation">Observation</option>
-        </select>
+        <select class="form-select form-select-sm resource-select"
+            [ngModel]="jobBridgeService.getSelectedResourceType()" (ngModelChange)="resourceTypeChanged($event)">
 
+            @for (resourceType of resourceTypes; track resourceType) {
+            <option [value]="resourceType">
+                {{ FhirResourceType[resourceType] }}
+            </option>
+            }
+        </select>
         <button class="btn btn-primary btn-sm approve-button" (click)="approveResourceType()">
             Approve
         </button>

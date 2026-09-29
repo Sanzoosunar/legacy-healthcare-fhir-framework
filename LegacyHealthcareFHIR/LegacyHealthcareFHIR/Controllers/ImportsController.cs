@@ -23,16 +23,8 @@ public class ImportsController : ControllerBase
         _queue = queue;
     }
 
-    [HttpPost("{jobId:guid}/resource-type/approve")]
-    public async Task<IActionResult> ApproveResourceType(Guid jobId, [FromBody] ApproveResourceTypeRequest request)
-    {
-        var success = await _importsService.ApproveResourceTypeAsync(jobId, request.ResourceType);
-
-        return Ok(new { success });
-    }
-
     [HttpPost]
-    public async Task<IActionResult> Create(IFormFile file)
+    public async Task<IActionResult> Create([FromForm] IFormFile file)
     {
         if (file == null || file.Length == 0)
         {
@@ -49,6 +41,14 @@ public class ImportsController : ControllerBase
         {
             jobId = job.Id
         });
+    }
+
+    [HttpPost("{jobId:guid}/resource-type/approve")]
+    public async Task<IActionResult> ApproveResourceType(Guid jobId, [FromBody] ApproveResourceTypeRequest request)
+    {
+        var success = await _importsService.ApproveResourceTypeAsync(jobId, request.ResourceType);
+
+        return Ok(new { success });
     }
 
 
@@ -72,8 +72,8 @@ public class ImportsController : ControllerBase
         var fields = new Dictionary<FhirResourceType, List<string>>
         {
             [FhirResourceType.Patient] = typeof(PatientData).GetProperties().Select(x => x.Name).ToList(),
-            [FhirResourceType.Encounter] = typeof(Encounter).GetProperties().Select(x => x.Name).ToList(),
-            [FhirResourceType.Observation] = typeof(Observation).GetProperties().Select(x => x.Name).ToList(),
+            [FhirResourceType.Encounter] = typeof(EncounterData).GetProperties().Select(x => x.Name).ToList(),
+            [FhirResourceType.Observation] = typeof(ObservationData).GetProperties().Select(x => x.Name).ToList(),
         };
 
         return Ok(fields);

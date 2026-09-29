@@ -27,6 +27,7 @@ public class BackgroundJobWorker : BackgroundService
                                 .FirstOrDefault(x => x._currentStage == message.Stage)
                                 ?? throw new InvalidOperationException($"No processor registered for stage: {message.Stage}");
 
+            await Task.Delay(2000);
             await processor.ExecuteAsync(message.JobId);
         }
     }

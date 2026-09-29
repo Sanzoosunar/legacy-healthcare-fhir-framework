@@ -14,6 +14,11 @@ export interface ImportJob {
     completedAtUtc?: string;
 }
 
+export interface ProcessedJob {
+    outputFileName?: string;
+    jobId: string,
+}
+
 
 export interface JobNotificationEvent {
     jobId: string;

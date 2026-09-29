@@ -5,8 +5,7 @@ using LegacyHealthcareFHIR.Core.Models.Import;
 using LegacyHealthcareFHIR.Core.Utilities;
 using LegacyHealthcareFHIR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
+
 
 namespace LegacyHealthcareFHIR.Infrastructure.Services;
 
@@ -31,7 +30,8 @@ public class ResourceTypeDetectionService
         var detection = await _dbContext.ResourceTypeDetections
                                    .FirstOrDefaultAsync(x =>
                                        x.HospitalId == hospitalId &&
-                                       x.SchemaFingerprint == fingerprint);
+                                       x.SchemaFingerprint == fingerprint &&
+                                       x.IsApproved);
 
         if (detection == null)
         {

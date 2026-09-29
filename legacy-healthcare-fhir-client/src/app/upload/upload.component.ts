@@ -15,7 +15,7 @@ import { FhirResourceType } from '../enums/resource-type';
 export class UploadComponent {
   public selectedStandard = 'FHIR';
   public standardErrorMessage?: string;
-  public isConvertBtnEnabled = true;
+  public isConvertBtnEnabled = false;
   public selectedFile?: File;
 
   constructor(
@@ -25,16 +25,15 @@ export class UploadComponent {
 
     this.isConvertBtnEnabled = false
 
-    this.jobBridgeService.setJobId('122');
-
-
-    this.jobBridgeService.setJobStage(JobStage.ResourceTypeDetection)
-    this.jobBridgeService.setJobStatus(JobStatus.AiSuggested)
-    this.jobBridgeService.setResourceTypeDetection({
-      resourceType: FhirResourceType.Patient,
-      aiConfidence: 0.99,
-      isApproved: false
-    })
+    // this.jobBridgeService.setJobId('122');
+    // this.jobBridgeService.setJobStage(JobStage.ResourceTypeDetection)
+    // this.jobBridgeService.setJobStatus(JobStatus.AiSuggested)
+    // this.jobBridgeService.setSelectedResourceType(FhirResourceType.Encounter);
+    // this.jobBridgeService.setResourceTypeDetection({
+    //   resourceType: FhirResourceType.Encounter,
+    //   aiConfidence: 0.99,
+    //   isApproved: false
+    // })
 
 
     // this.jobBridgeService.setJobStage(JobStage.FieldMapping)
@@ -92,6 +91,10 @@ export class UploadComponent {
   public onFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.selectedFile = input.files?.[0];
+
+    this.isConvertBtnEnabled = false;
+    if (this.selectedFile)
+      this.isConvertBtnEnabled = true;
   }
 
   onStandardChange(event: Event): void {
@@ -110,14 +113,16 @@ export class UploadComponent {
 
   public onConvertBtnClick(): void {
     this.isConvertBtnEnabled = false;
-
+    debugger;
     this.jobDataService.upload(this.selectedFile!).subscribe({
       next: response => {
+        debugger;
         this.jobBridgeService.setJobId(response.jobId);
         this.jobBridgeService.setJobStage(JobStage.ResourceTypeDetection)
         this.jobBridgeService.setJobStatus(JobStatus.InProgress)
       },
       error: () => {
+        debugger;
         this.isConvertBtnEnabled = true;
       }
     });

@@ -37,8 +37,10 @@ public class DataValidationProcessor: IJobProcessor
     {
         var job = await _jobRepo.GetWithDetails(jobId);
         ValidateJob(job!);
- 
-        await _jobRepo.UpdateStageAndStatus(jobId,_currentStage, JobStatus.InProgress);
+
+        job.JobStage = _currentStage;
+        job.Status = JobStatus.InProgress;
+        await _jobRepo.Update(job);
 
         var resourceType = job.ResourceTypeDetection!.ResourceType;
 
@@ -67,8 +69,7 @@ public class DataValidationProcessor: IJobProcessor
                 return;
             }
 
-            job.Status = JobStatus.Completed;
-            await _jobRepo.UpdateAsync(job);
+            await _jobRepo.UpdateStatus(job.Id,JobStatus.Completed);
 
             await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status, validationResult);
 

@@ -11,6 +11,5 @@ public interface IJobRepository
 
     Task<ImportJob> Update(ImportJob job);
     Task<ImportJob> GetAsync(Guid jobId);
-    Task<ImportJob> UpdateAsync(ImportJob job);
     Task<ResourceTypeDetection?> GetResourceTypeDetectionAsync(int resourceTypeId);
 }

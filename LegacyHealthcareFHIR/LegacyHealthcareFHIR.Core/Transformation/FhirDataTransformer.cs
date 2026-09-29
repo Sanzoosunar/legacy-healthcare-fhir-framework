@@ -16,6 +16,16 @@ public class FhirDataTransformer : INormalizedDataTransformer
                 .Cast<TransformedData>()
                 .ToList(),
 
+            FhirResourceType.Observation => ObservationFhirTransformer.Transform(normalizedData.Cast<ObservationData>().ToList())
+            .Select(x => new FhirTransformedData { Resource = x })
+            .Cast<TransformedData>()
+            .ToList(),
+
+            FhirResourceType.Encounter => EncounterFhirTransformer.Transform(normalizedData.Cast<EncounterData>().ToList())
+           .Select(x => new FhirTransformedData { Resource = x })
+           .Cast<TransformedData>()
+           .ToList(),
+
             _ => throw new Exception("unsupported resource type")
         };
     }

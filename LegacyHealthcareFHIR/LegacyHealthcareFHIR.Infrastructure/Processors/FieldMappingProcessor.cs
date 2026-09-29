@@ -41,7 +41,10 @@ public class FieldMappingProcessor : IJobProcessor
 
         try
         {
-            await _jobRepo.UpdateStageAndStatus(jobId,_currentStage,JobStatus.InProgress);
+            job.Status = JobStatus.InProgress;
+            job.JobStage = _currentStage;
+            await _jobRepo.Update(job);
+
             await _notifier.SendAsync(jobId, JobStage.FieldMapping, JobStatus.InProgress);
 
             var detection = job.ResourceTypeDetection;
@@ -67,7 +70,7 @@ public class FieldMappingProcessor : IJobProcessor
 
         job.MappingConfigurationId = aiSuggestedFields.ConfigurationId;
         job.Status = JobStatus.AiSuggested;
-        await _jobRepo.UpdateAsync(job);
+        await _jobRepo.Update(job);
 
         await _notifier.SendAsync(job.Id, job.JobStage, job.Status, aiSuggestedFields);
 

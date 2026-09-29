@@ -45,7 +45,10 @@ public class FhirTransformationProcessor: IJobProcessor
         var job = await _jobRepo.GetWithDetails(jobId);
         ValidateJob(job);
 
-        await _jobRepo.UpdateStageAndStatus(jobId,_currentStage,JobStatus.InProgress);
+        job.JobStage = _currentStage;
+        job.Status = JobStatus.InProgress;
+        await _jobRepo.Update(job);
+
         await _signalRNotifier.SendAsync(jobId, _currentStage, job.Status);
         try
         {
@@ -74,7 +77,7 @@ public class FhirTransformationProcessor: IJobProcessor
 
             var json = FhirSerializationUtility.Serialize(bundle);
 
-            var outputFileName = $"{job.Id}-fhir.json";
+            var outputFileName = $"{job.Id.ToString()}-{resourceType}.json";
 
             var bytes = System.Text.Encoding.UTF8.GetBytes(json);
             using var jsonStream = new MemoryStream(bytes);
@@ -83,7 +86,7 @@ public class FhirTransformationProcessor: IJobProcessor
 
             job.Status = JobStatus.Completed;
             job.OutputFileName = outputFileName;
-            await _jobRepo.UpdateAsync(job);
+            await _jobRepo.Update(job);
 
             await _signalRNotifier.SendAsync(jobId, _currentStage, job.Status);
             await _queue.EnqueueAsync(JobStage.Completed, jobId);
@@ -91,7 +94,7 @@ public class FhirTransformationProcessor: IJobProcessor
         catch (Exception ex)
         {
             job.Status = JobStatus.Failed;
-            await _jobRepo.UpdateAsync(job);
+            await _jobRepo.Update(job);
             await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status, ex.Message);
         }
     }

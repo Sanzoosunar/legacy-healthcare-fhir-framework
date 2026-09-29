@@ -14,7 +14,7 @@ public class ResourceTypeDetectionProcessor: IJobProcessor
     private readonly SourceFileService _sourceFileService;
     private readonly ResourceTypeDetectionService _resourceTypeDetectionService;
     private readonly IJobRepository _jobRepo;
-    public JobStage _currentStage => JobStage.DataValidation;
+    public JobStage _currentStage => JobStage.ResourceTypeDetection;
     public ResourceTypeDetectionProcessor(
         ISignalRNotifier signalRNotifier,
         SourceFileService sourceFileService,
@@ -36,15 +36,14 @@ public class ResourceTypeDetectionProcessor: IJobProcessor
     public async Task ExecuteAsync(Guid jobId)
     {
         var job = await _jobRepo.Get(jobId);
-        await StartDetectionAsync(job);
+        job.JobStage = _currentStage;
+        job.Status = JobStatus.InProgress;
+        await _jobRepo.Update(job);
+
+        await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status);
+
         var sourceFileData = await ReadSourceFileAsync(job);
         await DetectResourceTypeAsync(job, sourceFileData);
-    }
-
-    private async Task StartDetectionAsync(ImportJob job)
-    {
-        await _jobRepo.UpdateStageAndStatus(job.Id,_currentStage,JobStatus.InProgress);
-        await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status);
     }
 
     private async Task<SourceFileData> ReadSourceFileAsync(ImportJob job)
@@ -60,7 +59,7 @@ public class ResourceTypeDetectionProcessor: IJobProcessor
 
             job.Status = JobStatus.AiSuggested;
             job.ResourceTypeDetectionId = result.DetectionId;
-            await _jobRepo.UpdateAsync(job);
+            await _jobRepo.Update(job);
 
             await _signalRNotifier.SendAsync(job.Id, _currentStage, job.Status, result);
 

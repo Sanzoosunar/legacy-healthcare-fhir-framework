@@ -27,7 +27,15 @@ public class FieldMappingService
 
         var configuration = await _dbContext.MappingConfigurations
             .Include(x => x.FieldMappings)
-            .FirstOrDefaultAsync(x => x.HospitalId == hospitalId && x.SchemaFingerprint == fingerprint && x.ResourceType == resourceType);
+            .FirstOrDefaultAsync(x => x.HospitalId == hospitalId && 
+                x.SchemaFingerprint == fingerprint &&
+                x.ResourceType == resourceType);
+
+        if (configuration != null && !configuration.IsApproved)
+        {
+            await RemoveExistingNonApprovedConfig(configuration.Id);
+            configuration = null;
+        }
 
         if (configuration == null)
         {
@@ -39,30 +47,50 @@ public class FieldMappingService
 
     private async Task<MappingConfiguration> CreateMappingAsync(int hospitalId, FhirResourceType resourceType, string fingerprint, SourceFileData sourceFileData)
     {
-        var aiResult = await _aiService.SuggestMappingsAsync(resourceType, sourceFileData);
-
-        var configuration = new MappingConfiguration
+        try
         {
-            HospitalId = hospitalId,
-            SchemaFingerprint = fingerprint,
-            ResourceType = resourceType,
-        };
+            var aiResult = await _aiService.SuggestMappingsAsync(resourceType, sourceFileData);
 
-        foreach (var suggestion in aiResult.Mappings)
-        {
-            configuration.FieldMappings.Add(new FieldMapping
+            var configuration = new MappingConfiguration
             {
-                SourceField = suggestion.SourceField,
-                NormalizedField = suggestion.NormalizedField,
-                AiConfidence = suggestion.AiConfidence,
-                AiExplanation = suggestion.AiExplanation
-            });
+                HospitalId = hospitalId,
+                SchemaFingerprint = fingerprint,
+                ResourceType = resourceType,
+            };
+
+            foreach (var suggestion in aiResult.Mappings)
+            {
+                configuration.FieldMappings.Add(new FieldMapping
+                {
+                    SourceField = suggestion.SourceField,
+                    NormalizedField = suggestion.NormalizedField,
+                    AiConfidence = suggestion.AiConfidence,
+                    AiExplanation = suggestion.AiExplanation
+                });
+            }
+
+            _dbContext.MappingConfigurations.Add(configuration);
+            await _dbContext.SaveChangesAsync();
+            return configuration;
         }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
 
-        _dbContext.MappingConfigurations.Add(configuration);
-        await _dbContext.SaveChangesAsync();
+    public async Task RemoveExistingNonApprovedConfig(int configId)
+    {
+        var configuration = await _dbContext.MappingConfigurations
+             .Include(x => x.FieldMappings)
+            .FirstOrDefaultAsync(x => x.Id == configId);
+        if (configuration != null)
+        {
+            _dbContext.FieldMappings.RemoveRange(configuration.FieldMappings);
+            _dbContext.MappingConfigurations.Remove(configuration);
 
-        return configuration;
+            await _dbContext.SaveChangesAsync();
+        }
     }
 
     private static FieldMappingResult CreateResult(MappingConfiguration configuration)

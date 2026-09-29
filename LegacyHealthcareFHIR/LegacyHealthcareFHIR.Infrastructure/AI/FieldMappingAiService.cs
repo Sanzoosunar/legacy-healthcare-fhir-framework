@@ -97,13 +97,48 @@ public class FieldMappingAiService : IFieldMappingAiService
         return resourceType switch
         {
             FhirResourceType.Patient =>
-       [
-           nameof(PatientData.PatientId),
-            nameof(PatientData.FirstName),
-            nameof(PatientData.LastName),
-            nameof(PatientData.DateOfBirth),
-            nameof(PatientData.Gender)
-       ],
+            [
+                nameof(PatientData.PatientId),
+                nameof(PatientData.FirstName),
+                nameof(PatientData.LastName),
+                nameof(PatientData.DateOfBirth),
+                nameof(PatientData.Gender)
+            ],
+            FhirResourceType.Observation =>
+            [
+                nameof(ObservationData.ObservationId),
+                nameof(ObservationData.PatientId),
+                nameof(ObservationData.EncounterId),
+                nameof(ObservationData.Status),
+                nameof(ObservationData.CategoryCode),
+                nameof(ObservationData.CategoryDisplay),
+                nameof(ObservationData.Code),
+                nameof(ObservationData.CodeDisplay),
+                nameof(ObservationData.CodeSystem),
+                nameof(ObservationData.EffectiveDateTime),
+                nameof(ObservationData.Value),
+                nameof(ObservationData.Unit),
+                nameof(ObservationData.UnitCode),
+                nameof(ObservationData.UnitSystem),
+                nameof(ObservationData.ReferenceRangeLow),
+                nameof(ObservationData.ReferenceRangeHigh)
+            ],
+            FhirResourceType.Encounter =>
+            [
+                nameof(EncounterData.EncounterId),
+                nameof(EncounterData.PatientId),
+                nameof(EncounterData.Status),
+                nameof(EncounterData.Class),
+                nameof(EncounterData.TypeCode),
+                nameof(EncounterData.TypeDisplay),
+                nameof(EncounterData.StartDateTime),
+                nameof(EncounterData.EndDateTime),
+                nameof(EncounterData.PractitionerId),
+                nameof(EncounterData.LocationId),
+                nameof(EncounterData.ReasonCode),
+                nameof(EncounterData.ReasonDisplay)
+            ],
+
             _ => throw new InvalidOperationException($"Field mapping is not supported for resource type '{resourceType}'.")
         };
     }

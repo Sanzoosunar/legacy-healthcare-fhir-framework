@@ -40,15 +40,15 @@ public class CompletedProcessor:IJobProcessor
             job.Status = JobStatus.Completed;
             job.JobStage = _currentStage;
             job.StoredFileName = string.Empty;
-            await _jobRepo.UpdateAsync(job);
+            await _jobRepo.Update(job);
 
-            await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status,"Completed");
+            await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status,job.OutputFileName);
         }
         catch(Exception ex)
         {
             job.Status = JobStatus.Failed;
             job.JobStage = _currentStage;
-            await _jobRepo.UpdateAsync(job);
+            await _jobRepo.Update(job);
 
             await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status, ex.Message);
         }
