@@ -1,7 +1,9 @@
-﻿using LegacyHealthcareFHIR.Core.Enums;
+﻿using Hl7.Fhir.Model;
+using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Import;
+using LegacyHealthcareFHIR.Core.Models.Normalized;
 using LegacyHealthcareFHIR.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LegacyHealthcareFHIR.Web.Controllers;
 
 [ApiController]
-[Route("api/imports")]
+[Route("api/v1/imports")]
 public class ImportsController : ControllerBase
 {
     private readonly ImportsService _importsService;
@@ -21,16 +23,8 @@ public class ImportsController : ControllerBase
         _queue = queue;
     }
 
-    [HttpPost("{jobId:guid}/resource-type/approve")]
-    public async Task<IActionResult> ApproveResourceType(Guid jobId, [FromBody] ApproveResourceTypeRequest request)
-    {
-        var success = await _importsService.ApproveResourceTypeAsync(jobId, request.ResourceType);
-
-        return Ok(new { success });
-    }
-
     [HttpPost]
-    public async Task<IActionResult> Create(IFormFile file)
+    public async Task<IActionResult> Create([FromForm] IFormFile file)
     {
         if (file == null || file.Length == 0)
         {
@@ -49,6 +43,14 @@ public class ImportsController : ControllerBase
         });
     }
 
+    [HttpPost("{jobId:guid}/resource-type/approve")]
+    public async Task<IActionResult> ApproveResourceType(Guid jobId, [FromBody] ApproveResourceTypeRequest request)
+    {
+        var success = await _importsService.ApproveResourceTypeAsync(jobId, request.ResourceType);
+
+        return Ok(new { success });
+    }
+
 
     [HttpPost("rerun")]
     public async Task<IActionResult> ReRunJob([FromBody] BackgroundTaskMessage message)
@@ -62,5 +64,18 @@ public class ImportsController : ControllerBase
     {
         await _importsService.ApproveFieldMappingAsync(jobId, request);
         return Ok();
+    }
+
+    [HttpGet("normalized-fields")]
+    public IActionResult GetNormalizedFields()
+    {
+        var fields = new Dictionary<FhirResourceType, List<string>>
+        {
+            [FhirResourceType.Patient] = typeof(PatientData).GetProperties().Select(x => x.Name).ToList(),
+            [FhirResourceType.Encounter] = typeof(EncounterData).GetProperties().Select(x => x.Name).ToList(),
+            [FhirResourceType.Observation] = typeof(ObservationData).GetProperties().Select(x => x.Name).ToList(),
+        };
+
+        return Ok(fields);
     }
 }

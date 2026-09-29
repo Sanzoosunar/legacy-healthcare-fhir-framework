@@ -1,32 +1,30 @@
 ﻿using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
-using LegacyHealthcareFHIR.Core.Mapping;
 using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Validation;
 using LegacyHealthcareFHIR.Infrastructure.Csv;
-using LegacyHealthcareFHIR.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using System.Collections;
-using System.ComponentModel.DataAnnotations;
 
 namespace LegacyHealthcareFHIR.Infrastructure.Processors;
 
-public class DataValidationProcessor
+public class DataValidationProcessor: IJobProcessor
 {
     private readonly IJobRepository _jobRepo;
-    private readonly AppDbContext _dbContext;
     private readonly LocalFileStorageService _fileStorage;
     private readonly LegacyCsvReader _csvReader;
     private readonly ILegacyDataConverter _legacyDataConverter;
     private readonly ILegacyDataValidator _legacyDataValidator;
     private readonly IBackgroundTaskQueue _queue;
     private readonly ISignalRNotifier _signalRNotifier;
-
-    private readonly JobStage _currentStage = JobStage.DataValidation;
-    public DataValidationProcessor(IJobRepository jobRepo, AppDbContext dbContext, LocalFileStorageService fileStorage, LegacyCsvReader csvReader, ILegacyDataConverter legacyDataConverter, ILegacyDataValidator legacyDataValidator, IBackgroundTaskQueue queue, ISignalRNotifier signalRNotifier)
+    public JobStage _currentStage => JobStage.DataValidation;
+    public DataValidationProcessor(IJobRepository jobRepo, 
+        LocalFileStorageService fileStorage, 
+        LegacyCsvReader csvReader, 
+        ILegacyDataConverter legacyDataConverter,
+        ILegacyDataValidator legacyDataValidator, 
+        IBackgroundTaskQueue queue, 
+        ISignalRNotifier signalRNotifier)
     {
         _jobRepo = jobRepo;
-        _dbContext = dbContext;
         _fileStorage = fileStorage;
         _csvReader = csvReader;
         _legacyDataConverter = legacyDataConverter;
@@ -35,22 +33,14 @@ public class DataValidationProcessor
         _signalRNotifier = signalRNotifier;
     }
 
-
-
     public async Task ExecuteAsync(Guid jobId)
     {
-        var job = await _dbContext.ImportJobs
-          .Include(x => x.ResourceTypeDetection)
-          .Include(x => x.MappingConfiguration)
-          .ThenInclude(x => x!.FieldMappings)
-          .FirstOrDefaultAsync(x => x.Id == jobId) ?? throw new Exception("job not found");
-
+        var job = await _jobRepo.GetWithDetails(jobId);
         ValidateJob(job!);
-       
 
         job.JobStage = _currentStage;
         job.Status = JobStatus.InProgress;
-        await _jobRepo.UpdateAsync(job);
+        await _jobRepo.Update(job);
 
         var resourceType = job.ResourceTypeDetection!.ResourceType;
 
@@ -73,15 +63,13 @@ public class DataValidationProcessor
 
             if (!validationResult.IsValid)
             {
-                job.Status = JobStatus.Failed;
-                await _jobRepo.UpdateAsync(job);
+                await _jobRepo.UpdateStatus(jobId, JobStatus.Failed);
 
                 await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status, validationResult);
                 return;
             }
 
-            job.Status = JobStatus.Completed;
-            await _jobRepo.UpdateAsync(job);
+            await _jobRepo.UpdateStatus(job.Id,JobStatus.Completed);
 
             await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status, validationResult);
 
@@ -89,9 +77,7 @@ public class DataValidationProcessor
         }
         catch(Exception ex)
         {
-            job.Status = JobStatus.Failed;
-            await _jobRepo.UpdateAsync(job);
-
+            await _jobRepo.UpdateStatus(jobId,JobStatus.Failed);
             await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status, ex.Message);
         }
     }

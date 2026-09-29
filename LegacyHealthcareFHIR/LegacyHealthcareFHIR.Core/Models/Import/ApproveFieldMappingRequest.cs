@@ -1,7 +1,4 @@
-﻿using LegacyHealthcareFHIR.Core.Enums;
-
-
-namespace LegacyHealthcareFHIR.Core.Models.Import;
+﻿namespace LegacyHealthcareFHIR.Core.Models.Import;
 public class ApproveFieldMappingRequest
 {
     public List<ApproveFieldMappingItemRequest> Mappings { get; set; } = new();

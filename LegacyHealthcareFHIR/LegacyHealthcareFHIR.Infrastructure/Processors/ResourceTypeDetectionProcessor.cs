@@ -3,18 +3,18 @@ using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Detection;
 using LegacyHealthcareFHIR.Core.Models.Import;
+using LegacyHealthcareFHIR.Core.Validation;
 using LegacyHealthcareFHIR.Infrastructure.Services;
 
 namespace LegacyHealthcareFHIR.Infrastructure.Processors;
 
-public class ResourceTypeDetectionProcessor
+public class ResourceTypeDetectionProcessor: IJobProcessor
 {
     private readonly ISignalRNotifier _signalRNotifier;
     private readonly SourceFileService _sourceFileService;
     private readonly ResourceTypeDetectionService _resourceTypeDetectionService;
     private readonly IJobRepository _jobRepo;
-
-    private readonly JobStage _currentStage = JobStage.ResourceTypeDetection;
+    public JobStage _currentStage => JobStage.ResourceTypeDetection;
     public ResourceTypeDetectionProcessor(
         ISignalRNotifier signalRNotifier,
         SourceFileService sourceFileService,
@@ -27,26 +27,23 @@ public class ResourceTypeDetectionProcessor
         _jobRepo = jobRepo;
     }
 
-    public async Task ExecuteAsync(Guid jobId)
+    public void Validate(ImportJob job)
     {
-        var job = await StartDetectionAsync(jobId);
-
-        var sourceFileData = await ReadSourceFileAsync(job);
-
-        await DetectResourceTypeAsync(job, sourceFileData);
+        var isValid = JobStateValidator.IsValid(job.JobStage, job.Status, _currentStage);
+        if (!isValid) throw new Exception("Not in valid state");
     }
 
-    private async Task<ImportJob> StartDetectionAsync(Guid jobId)
+    public async Task ExecuteAsync(Guid jobId)
     {
-        var job = await _jobRepo.GetAsync(jobId);
-
-        job.Status = JobStatus.InProgress;
+        var job = await _jobRepo.Get(jobId);
         job.JobStage = _currentStage;
-        await _jobRepo.UpdateAsync(job);
+        job.Status = JobStatus.InProgress;
+        await _jobRepo.Update(job);
 
         await _signalRNotifier.SendAsync(job.Id, job.JobStage, job.Status);
 
-        return job;
+        var sourceFileData = await ReadSourceFileAsync(job);
+        await DetectResourceTypeAsync(job, sourceFileData);
     }
 
     private async Task<SourceFileData> ReadSourceFileAsync(ImportJob job)
@@ -56,14 +53,13 @@ public class ResourceTypeDetectionProcessor
 
     private async Task<ResourceTypeDetectionResult> DetectResourceTypeAsync(ImportJob job, SourceFileData sourceFileData)
     {
-        await _signalRNotifier.SendAsync(job.Id, JobStage.ResourceTypeDetection, JobStatus.AiSuggestionWaiting);
         try
         {
             var result = await _resourceTypeDetectionService.DetectAsync(job.HospitalId, sourceFileData);
 
             job.Status = JobStatus.AiSuggested;
             job.ResourceTypeDetectionId = result.DetectionId;
-            await _jobRepo.UpdateAsync(job);
+            await _jobRepo.Update(job);
 
             await _signalRNotifier.SendAsync(job.Id, _currentStage, job.Status, result);
 
@@ -71,9 +67,7 @@ public class ResourceTypeDetectionProcessor
         }
         catch (Exception ex)
         {
-            job.Status = JobStatus.Failed;
-            await _jobRepo.UpdateAsync(job);
-
+            await _jobRepo.UpdateStatus(job.Id,JobStatus.Failed);
             await _signalRNotifier.SendAsync(job.Id, _currentStage, JobStatus.Failed, ex.Message);
             throw;
         }

@@ -218,6 +218,9 @@ namespace LegacyHealthcareFHIR.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("OutputFileName")
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("ResourceTypeDetectionId")
                         .HasColumnType("INTEGER");
 
