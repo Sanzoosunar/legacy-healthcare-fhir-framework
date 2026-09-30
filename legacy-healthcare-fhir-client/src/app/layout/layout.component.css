@@ -105,7 +105,10 @@
 .main-content {
     flex: 1;
     min-width: 0;
-    padding: 36px 32px 50px;
+}
+
+.page-content {
+    padding: 24px 32px 50px;
 }
 
 @media (max-width: 900px) {
@@ -113,7 +116,7 @@
         width: 210px;
     }
 
-    .main-content {
+    .page-content {
         padding: 24px 18px;
     }
 }
