@@ -5,6 +5,7 @@ import { backendUrl } from '../environment';
 import { HttpClient } from '@angular/common/http';
 import { FhirResourceType } from '../enums/resource-type';
 import { NormalizedFieldsResponse } from '../models/job';
+import { JobResponseDto } from '../models/dashboard-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -16,11 +17,13 @@ export class JobDataService {
   constructor(private httpClient: HttpClient) {
   }
 
+  public getJobs(): Observable<Array<JobResponseDto>> {
+    return this.httpClient.get<Array<JobResponseDto>>(`${this.baseUrl}/jobs`);
+  }
 
   public getNormalizedFields(): Observable<NormalizedFieldsResponse> {
     return this.httpClient.get<NormalizedFieldsResponse>(`${this.baseUrl}/normalized-fields`);
   }
-
 
   public upload(file: File): Observable<CreateJobResponse> {
     const formData = new FormData();

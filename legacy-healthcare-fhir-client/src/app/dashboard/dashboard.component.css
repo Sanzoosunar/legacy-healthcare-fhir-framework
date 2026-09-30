@@ -25,22 +25,6 @@
     font-size: 16px;
 }
 
-.upload-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.upload-icon {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
 
 .summary-section {
     margin-bottom: 28px;
@@ -124,78 +108,8 @@
     font-weight: 700;
 }
 
-.jobs-table {
-    margin: 0;
-    vertical-align: middle;
-}
 
-.jobs-table thead th {
-    padding: 15px 14px;
-    background-color: #f1f5f9;
-    color: #172b4d;
-    border-bottom: 1px solid #dfe6ee;
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-}
 
-.jobs-table thead th:first-child {
-    border-top-left-radius: 9px;
-}
-
-.jobs-table thead th:last-child {
-    border-top-right-radius: 9px;
-}
-
-.jobs-table tbody td {
-    padding: 14px;
-    color: #24364b;
-    border-bottom: 1px solid #e4e9ef;
-    font-size: 14px;
-    white-space: nowrap;
-}
-
-.jobs-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.jobs-table tbody tr:hover {
-    background-color: #fafcff;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 6px 11px;
-    border-radius: 7px;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1;
-}
-
-.status-completed {
-    color: #0a8f50;
-    background-color: #dcf4e8;
-}
-
-.status-progress {
-    color: #0d6efd;
-    background-color: #e1efff;
-}
-
-.status-review {
-    color: #b87500;
-    background-color: #fff1ce;
-}
-
-.status-failed {
-    color: #dc3545;
-    background-color: #fde3e5;
-}
-
-.view-button {
-    min-width: 55px;
-    border-radius: 6px;
-}
 
 @media (max-width: 768px) {
     .dashboard-header {

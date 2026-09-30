@@ -1,0 +1,45 @@
+<div class="table-responsive">
+    <table class="table jobs-table">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Resource Type</th>
+                <th>Stage</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th class="text-end">Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @for (job of jobs; track job.jobId) {
+            <tr>
+                <td>{{ job.originalFileName }}</td>
+                <td>{{ job.resourceType ?? 'Not detected' }}</td>
+                <td>
+                    <span [class]="'status-badge ' + jobStages[job.jobStage].className">
+                        {{ jobStages[job.jobStage].label }}
+                    </span>
+                </td>
+                <td>
+                    <span [class]="'status-badge ' + jobStatuses[job.jobStatus].className">
+                        {{ jobStatuses[job.jobStatus].label }}
+                    </span>
+                </td>
+                <td>{{ job.createdAt | date:'MMM d, y h:mm a' }}</td>
+                <td class="text-end">
+                    <a [routerLink]="['/jobs', job.jobId]" class="btn btn-outline-primary btn-sm view-button">
+                        View
+                    </a>
+                </td>
+            </tr>
+            } @empty {
+            <tr>
+                <td colspan="6" class="text-center py-4">
+                    No import jobs yet.
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

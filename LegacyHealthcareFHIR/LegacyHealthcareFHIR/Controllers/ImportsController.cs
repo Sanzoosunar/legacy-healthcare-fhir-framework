@@ -1,4 +1,5 @@
 ﻿using Hl7.Fhir.Model;
+using LegacyHealthcareFHIR.Core.Dto;
 using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Models;
@@ -7,7 +8,6 @@ using LegacyHealthcareFHIR.Core.Models.Normalized;
 using LegacyHealthcareFHIR.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace LegacyHealthcareFHIR.Web.Controllers;
 
@@ -69,5 +69,12 @@ public class ImportsController(ImportsService _importsService,
         };
 
         return Ok(fields);
+    }
+
+    [HttpGet("jobs")]
+    public async Task<ActionResult<List<JobResponseDto>>> GetJobs()
+    {
+        var jobs = await _importsService.GetJobsByHospitalId(_currentUser.HospitalId);
+        return Ok(jobs);
     }
 }

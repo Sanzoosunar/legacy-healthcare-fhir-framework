@@ -1,3 +1,10 @@
+@if (isLoading) {
+<app-loading></app-loading>
+} @else if (errorMessage) {
+<div class="dashboard-loading" role="alert">
+    {{ errorMessage }}
+</div>
+} @else {
 <div class="dashboard">
     <div class="dashboard-header">
         <div>
@@ -73,123 +80,7 @@
             <h2>Recent Import Jobs</h2>
         </div>
 
-        <div class="table-responsive">
-            <table class="table jobs-table">
-                <thead>
-                    <tr>
-                        <th>File Name</th>
-                        <th>Resource Type</th>
-                        <th>Stage</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th class="text-end">Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr>
-                        <td>patients.csv</td>
-                        <td>Patient</td>
-                        <td>Completed</td>
-                        <td>
-                            <span class="status-badge status-completed">
-                                Completed
-                            </span>
-                        </td>
-                        <td>Sep 21, 2026 10:14 AM</td>
-                        <td class="text-end">
-                            <button class="btn btn-outline-primary btn-sm view-button">
-                                View
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>encounters.csv</td>
-                        <td>Encounter</td>
-                        <td>Field Mapping</td>
-                        <td>
-                            <span class="status-badge status-review">
-                                AI Suggested
-                            </span>
-                        </td>
-                        <td>Sep 21, 2026 9:42 AM</td>
-                        <td class="text-end">
-                            <button class="btn btn-outline-primary btn-sm view-button">
-                                View
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>observations.csv</td>
-                        <td>Observation</td>
-                        <td>Data Validation</td>
-                        <td>
-                            <span class="status-badge status-progress">
-                                In Progress
-                            </span>
-                        </td>
-                        <td>Sep 20, 2026 4:11 PM</td>
-                        <td class="text-end">
-                            <button class="btn btn-outline-primary btn-sm view-button">
-                                View
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>patient_old.csv</td>
-                        <td>Patient</td>
-                        <td>Resource Type Detection</td>
-                        <td>
-                            <span class="status-badge status-failed">
-                                Failed
-                            </span>
-                        </td>
-                        <td>Sep 20, 2026 2:37 PM</td>
-                        <td class="text-end">
-                            <button class="btn btn-outline-primary btn-sm view-button">
-                                View
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>vital_signs.csv</td>
-                        <td>Observation</td>
-                        <td>Field Mapping</td>
-                        <td>
-                            <span class="status-badge status-review">
-                                AI Suggested
-                            </span>
-                        </td>
-                        <td>Sep 19, 2026 1:22 PM</td>
-                        <td class="text-end">
-                            <button class="btn btn-outline-primary btn-sm view-button">
-                                View
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>admissions.csv</td>
-                        <td>Encounter</td>
-                        <td>Completed</td>
-                        <td>
-                            <span class="status-badge status-completed">
-                                Completed
-                            </span>
-                        </td>
-                        <td>Sep 18, 2026 11:03 AM</td>
-                        <td class="text-end">
-                            <button class="btn btn-outline-primary btn-sm view-button">
-                                View
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <app-jobs-table [jobs]="dashboard.recentJobs"></app-jobs-table>
     </div>
 </div>
+}
