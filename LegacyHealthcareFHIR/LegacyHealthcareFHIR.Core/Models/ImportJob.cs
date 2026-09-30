@@ -6,7 +6,8 @@ public class ImportJob
     public Guid Id { get; set; } = Guid.NewGuid();
 
     public int HospitalId { get; set; }
-
+    public int UserId { get; set; }
+    public AppUser AppUser { get; set; } = null!;
     public string OriginalFileName { get; set; }
 
     public string StoredFileName { get; set; }

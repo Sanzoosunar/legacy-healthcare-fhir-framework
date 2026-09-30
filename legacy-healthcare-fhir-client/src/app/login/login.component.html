@@ -1,0 +1,30 @@
+<main class="login-page">
+    <section class="login-card">
+        <div class="brand">
+            <div class="medical-cross" aria-hidden="true">✚</div>
+            <h1>Legacy Healthcare to FHIR</h1>
+        </div>
+
+        <form #loginForm="ngForm" (ngSubmit)="login()">
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" [(ngModel)]="username"
+                    placeholder="Enter your username" autocomplete="username" required>
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" [(ngModel)]="password"
+                    placeholder="Enter your password" autocomplete="current-password" required>
+            </div>
+
+            <p class="error" role="alert" [hidden]="!errorMessage">
+                {{ errorMessage }}
+            </p>
+
+            <button type="submit" [disabled]="loginForm.invalid || loading">
+                {{ loading ? 'Signing in...' : 'Login' }}
+            </button>
+        </form>
+    </section>
+</main>

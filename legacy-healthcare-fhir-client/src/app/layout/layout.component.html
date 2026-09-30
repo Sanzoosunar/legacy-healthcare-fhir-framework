@@ -1,0 +1,50 @@
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">✚</div>
+
+            <div>
+                <div class="brand-title">Legacy Healthcare</div>
+                <div class="brand-subtitle">FHIR Integration</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z" />
+                    <path d="M9 21v-8h6v8" />
+                </svg>
+                <span>Dashboard</span>
+            </a>
+
+            <a routerLink="/upload" routerLinkActive="active">
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 16V3m-5 5 5-5 5 5" />
+                    <path d="M3 16v4a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-4" />
+                </svg>
+                <span>Upload</span>
+            </a>
+
+            <a routerLink="/jobs" routerLinkActive="active">
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="4" y="3" width="16" height="18" rx="2" />
+                    <path d="M8 8h8M8 12h8M8 16h5" />
+                </svg>
+                <span>Jobs</span>
+            </a>
+
+            <button type="button" (click)="logout()">
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 21H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5" />
+                    <path d="M9 12h12m-5-5 5 5-5 5" />
+                </svg>
+                <span>Logout</span>
+            </button>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <router-outlet></router-outlet>
+    </main>
+</div>
