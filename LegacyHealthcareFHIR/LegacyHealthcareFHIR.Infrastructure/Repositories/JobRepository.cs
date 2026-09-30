@@ -15,13 +15,14 @@ public class JobRepository : IJobRepository
     }
 
 
-    public async Task<ImportJob> AddNewJob(int hospitalId, string originalFileName, string storedFileName, string format)
+    public async Task<ImportJob> AddNewJob(int hospitalId, int userId, string originalFileName, string storedFileName, string format)
     {
         var jobId = Guid.NewGuid();
         var job = new ImportJob
         {
             Id = jobId,
             HospitalId = hospitalId,
+            UserId = userId,
             OriginalFileName = originalFileName,
             StoredFileName = storedFileName,
             InputFormat = format,

@@ -18,8 +18,7 @@ public class AppDbContext : DbContext
 
     public DbSet<Hospital> Hospitals => Set<Hospital>();
 
-    public DbSet<HospitalConfiguration> HospitalConfigurations
-        => Set<HospitalConfiguration>();
+    public DbSet<AppUser> Users => Set<AppUser>();
 
     public DbSet<ImportJob> ImportJobs => Set<ImportJob>();
 
@@ -54,30 +53,22 @@ public class AppDbContext : DbContext
             entity.HasIndex(x => x.Code)
                 .IsUnique();
         });
-
-        // Hospital Configuration
-        modelBuilder.Entity<HospitalConfiguration>(entity =>
-        {
-            entity.HasKey(x => x.Id);
-
-            entity.HasIndex(x => x.HospitalId)
-                .IsUnique();
-
-            entity.HasOne<Hospital>()
-                .WithOne()
-                .HasForeignKey<HospitalConfiguration>(x => x.HospitalId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
+       
 
         // Import Job
         modelBuilder.Entity<ImportJob>(entity =>
         {
             entity.HasKey(x => x.Id);
-
             entity.HasOne<Hospital>()
                 .WithMany()
                 .HasForeignKey(x => x.HospitalId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(job => job.AppUser)
+               .WithMany()
+               .HasForeignKey(job => job.UserId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<MappingConfiguration>()
@@ -146,5 +137,9 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(x => x.MappingConfigurationId)
             .OnDelete(DeleteBehavior.SetNull);
+
+
+
+       
     }
 }

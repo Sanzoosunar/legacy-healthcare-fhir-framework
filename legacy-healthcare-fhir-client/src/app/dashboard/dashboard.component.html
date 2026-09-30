@@ -6,7 +6,10 @@
         </div>
 
         <a routerLink="/upload" class="btn btn-primary upload-button">
-            <span class="upload-plus">+</span>
+            <svg class="upload-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 16V3m-5 5 5-5 5 5" />
+                <path d="M3 16v4a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-4" />
+            </svg>
             Upload Legacy Data
         </a>
     </div>
@@ -20,7 +23,7 @@
 
                 <div>
                     <div class="summary-title">Total Jobs</div>
-                    <div class="summary-value">12</div>
+                    <div class="summary-value">{{dashboard.totalJobs}}</div>
                 </div>
             </div>
         </div>
@@ -33,7 +36,7 @@
 
                 <div>
                     <div class="summary-title">In Progress</div>
-                    <div class="summary-value">2</div>
+                    <div class="summary-value">{{dashboard.totalInProgressJobs}}</div>
                 </div>
             </div>
         </div>
@@ -46,7 +49,7 @@
 
                 <div>
                     <div class="summary-title">Needs Review</div>
-                    <div class="summary-value">1</div>
+                    <div class="summary-value">{{dashboard.totalNeedReviewJobs}}</div>
                 </div>
             </div>
         </div>
@@ -59,7 +62,7 @@
 
                 <div>
                     <div class="summary-title">Failed</div>
-                    <div class="summary-value">1</div>
+                    <div class="summary-value">{{dashboard.totaFailedJobs}}</div>
                 </div>
             </div>
         </div>
