@@ -26,19 +26,20 @@
 }
 
 .upload-button {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 9px;
-    padding: 11px 22px;
-    border-radius: 8px;
-    font-size: 15px;
-    white-space: nowrap;
+    gap: 8px;
 }
 
-.upload-plus {
-    font-size: 22px;
-    line-height: 1;
-    font-weight: 300;
+.upload-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .summary-section {

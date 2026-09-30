@@ -1,5 +1,6 @@
 using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Mapping;
+using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Transformation;
 using LegacyHealthcareFHIR.Infrastructure;
 using LegacyHealthcareFHIR.Infrastructure.AI;
@@ -9,6 +10,8 @@ using LegacyHealthcareFHIR.Infrastructure.Processors;
 using LegacyHealthcareFHIR.Infrastructure.Queues;
 using LegacyHealthcareFHIR.Infrastructure.Repositories;
 using LegacyHealthcareFHIR.Infrastructure.Services;
+using LegacyHealthcareFHIR.Web.Extensions;
+using LegacyHealthcareFHIR.Web.Middlewares;
 using LegacyHealthcareFHIR.Web.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -64,7 +67,7 @@ builder.Services.AddSingleton(sp =>
         environment.ContentRootPath,
         "App_Data",
         "Uploads");
-
+    Directory.CreateDirectory(uploadDirectory);
     return new LocalFileStorageService(uploadDirectory);
 });
 
@@ -83,10 +86,16 @@ builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
 
 builder.Services.AddScoped<ResourceTypeDetectionService>();
 builder.Services.AddScoped<FieldMappingService>();
+builder.Services.AddScoped<DashboardService>();
 
 builder.Services.AddScoped<ImportsService>();
 builder.Services.AddScoped<FhirTransformationProcessor>();
 builder.Services.AddScoped<INormalizedDataTransformer, FhirDataTransformer>();
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<JwtTokenService>();
+builder.Services.AddScoped<CurrentUser>();
 
 var app = builder.Build();
 app.UseCors("AngularClient");
@@ -110,8 +119,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseMiddleware<CurrentUserMiddleware>();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.MapHub<SignalRHub>("/hubs/import-job");

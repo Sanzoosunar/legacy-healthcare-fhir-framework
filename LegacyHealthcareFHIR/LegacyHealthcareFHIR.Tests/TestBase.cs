@@ -31,7 +31,7 @@ public abstract class TestBase : IAsyncLifetime
 
     protected readonly Mock<ILegacyDataConverter> _legacyDataConverterMock;
     protected readonly Mock<ILegacyDataValidator> _legacyDataValidatorMock;
-    protected readonly LegacyCsvReaderService _csvReader;
+    //protected readonly LegacyCsvReaderService _csvReader;
     protected readonly string _uploadDirectory;
     protected readonly LocalFileStorageService _fileStorage;
     protected TestBase()
@@ -52,14 +52,14 @@ public abstract class TestBase : IAsyncLifetime
         _backgroundTaskQueueMock = new Mock<IBackgroundTaskQueue>();
 
         _resourceTypeDetectionService = new ResourceTypeDetectionService(_dbcontext, _resourceTypeAiServiceMock.Object);
-        _importService = new ImportsService(_dbcontext, _localFileStorageServiceMock.Object, _backgroundTaskQueueMock.Object, _jobRepositoryMock.Object);
+        //_importService = new ImportsService(_dbcontext, _localFileStorageServiceMock.Object, _backgroundTaskQueueMock.Object, _jobRepositoryMock.Object);
         _fieldMappingService = new FieldMappingService(_dbcontext, _fieldMappingAiServiceMock.Object);
 
         _jobRepository = new JobRepository(_dbcontext);
 
         _legacyDataConverterMock = new Mock<ILegacyDataConverter>();
         _legacyDataValidatorMock = new Mock<ILegacyDataValidator>();
-        _csvReader = new LegacyCsvReaderService();
+        //_csvReader = new LegacyCsvReaderService();
 
         _uploadDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(_uploadDirectory);

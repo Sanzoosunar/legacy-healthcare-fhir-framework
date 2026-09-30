@@ -4,7 +4,7 @@ import { SignalRConnectionService } from './services/signal-r-connection.service
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

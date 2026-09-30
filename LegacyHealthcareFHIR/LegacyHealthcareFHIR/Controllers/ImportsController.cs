@@ -5,24 +5,19 @@ using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Import;
 using LegacyHealthcareFHIR.Core.Models.Normalized;
 using LegacyHealthcareFHIR.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
 namespace LegacyHealthcareFHIR.Web.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/v1/imports")]
-public class ImportsController : ControllerBase
+public class ImportsController(ImportsService _importsService,
+    IBackgroundTaskQueue _queue,
+    CurrentUser _currentUser) : ControllerBase
 {
-    private readonly ImportsService _importsService;
-    private readonly IBackgroundTaskQueue _queue;
-
-    public ImportsController(ImportsService importsService, IBackgroundTaskQueue queue)
-    {
-        _importsService = importsService;
-        _queue = queue;
-    }
-
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] IFormFile file)
     {
@@ -31,10 +26,8 @@ public class ImportsController : ControllerBase
             return BadRequest("File is required.");
         }
 
-        var hospitalId = 1;
-
         await using var stream = file.OpenReadStream();
-        var job = await _importsService.CreateImportJob(stream, file.FileName, hospitalId);
+        var job = await _importsService.CreateImportJob(stream, file.FileName, _currentUser.HospitalId, _currentUser.UserId);
 
         return Accepted(new
         {
