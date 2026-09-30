@@ -3,6 +3,7 @@ using LegacyHealthcareFHIR.Core.Models;
 
 public interface IJobRepository
 {
+    Task<List<ImportJob>> GetJobsByHospitalId(int hospitalId);
     Task<ImportJob> AddNewJob(int hospitalId, int userId, string originalFileName, string storedFileName, string format);
     Task<ImportJob> Get(Guid jobId);
     Task<ImportJob> GetWithDetails(Guid jobId);

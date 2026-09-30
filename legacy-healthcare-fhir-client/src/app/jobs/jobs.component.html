@@ -1,0 +1,25 @@
+@if(isLoading){
+<app-loading></app-loading>
+}
+@else {
+<div class="jobs-page">
+    <div class="jobs-header">
+        <div>
+            <h1>Import Jobs</h1>
+            <p>View and monitor your hospital’s data conversion jobs</p>
+        </div>
+
+        <a routerLink="/upload" class="btn btn-primary upload-button">
+            <svg class="upload-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 16V3m-5 5 5-5 5 5" />
+                <path d="M3 16v4a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-4" />
+            </svg>
+            Upload Legacy Data
+        </a>
+    </div>
+
+    <div class="jobs-card">
+        <app-jobs-table [jobs]="jobs"></app-jobs-table>
+    </div>
+</div>
+}

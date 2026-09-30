@@ -1,7 +1,10 @@
-﻿using LegacyHealthcareFHIR.Core.Enums;
+﻿using LegacyHealthcareFHIR.Core.Dto;
+using LegacyHealthcareFHIR.Core.Enums;
 using LegacyHealthcareFHIR.Core.Interfaces;
+using LegacyHealthcareFHIR.Core.Mapping;
 using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Import;
+using Microsoft.EntityFrameworkCore;
 
 namespace LegacyHealthcareFHIR.Infrastructure.Services;
 
@@ -46,7 +49,6 @@ public class ImportsService
         await _queue.EnqueueAsync(JobStage.FieldMapping, job.Id);
         return true;
     }
-
     public async Task<bool> ApproveFieldMappingAsync(Guid jobId , ApproveFieldMappingRequest request)
     {
         var job = await _jobRepository.GetWithDetails(jobId);
@@ -73,5 +75,11 @@ public class ImportsService
 
         await _queue.EnqueueAsync(JobStage.DataValidation, job.Id);
         return true;
+    }
+    public async Task<List<JobResponseDto>> GetJobsByHospitalId(int hospitalId)
+    {
+        var jobs = await _jobRepository.GetJobsByHospitalId(hospitalId);
+        var mapped = jobs.Select(JobDataConverter.MapToJobResponseDto).ToList();
+        return mapped;
     }
 }
