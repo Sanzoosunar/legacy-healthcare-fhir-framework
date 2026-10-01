@@ -4,7 +4,6 @@ using LegacyHealthcareFHIR.Core.Interfaces;
 using LegacyHealthcareFHIR.Core.Mapping;
 using LegacyHealthcareFHIR.Core.Models;
 using LegacyHealthcareFHIR.Core.Models.Import;
-using Microsoft.EntityFrameworkCore;
 
 namespace LegacyHealthcareFHIR.Infrastructure.Services;
 
@@ -81,5 +80,36 @@ public class ImportsService
         var jobs = await _jobRepository.GetJobsByHospitalId(hospitalId);
         var mapped = jobs.Select(JobDataConverter.MapToJobResponseDto).ToList();
         return mapped;
+    }
+
+    public async Task<OutputFileResultDto> GetOutputFile(int hospitalId,Guid jobId)
+    {
+        var job = await _jobRepository.Get(jobId);
+        if (job.HospitalId != hospitalId)
+        {
+            throw new Exception("Job not found");
+        }
+
+        if (!(job.JobStage == JobStage.Completed && job.Status == JobStatus.Completed) || string.IsNullOrWhiteSpace(job.OutputFileName))
+        {
+            throw new Exception("The output file is not ready for download.");
+        }
+        try
+        {
+            var fileStream = _fileStorage.OpenRead(job.OutputFileName);
+            var fileName = Path.GetFileName(job.OutputFileName);
+            return new OutputFileResultDto
+            {
+                FileStream = fileStream, FileName = fileName
+            };
+        }
+        catch (FileNotFoundException)
+        {
+            throw new Exception("Output file not found.");
+        }
+        catch (DirectoryNotFoundException)
+        {
+            throw new Exception("Output file not found.");
+        }
     }
 }

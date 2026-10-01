@@ -7,7 +7,9 @@ using LegacyHealthcareFHIR.Core.Models.Import;
 using LegacyHealthcareFHIR.Core.Models.Normalized;
 using LegacyHealthcareFHIR.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LegacyHealthcareFHIR.Web.Controllers;
 
@@ -76,5 +78,19 @@ public class ImportsController(ImportsService _importsService,
     {
         var jobs = await _importsService.GetJobsByHospitalId(_currentUser.HospitalId);
         return Ok(jobs);
+    }
+
+    [HttpGet("{jobId:guid}/download")]
+    public async Task<IActionResult> Download(Guid jobId)
+    {
+        try
+        {
+            var output = await _importsService.GetOutputFile(_currentUser.HospitalId, jobId);
+            return File(output.FileStream, "application/fhir+json", output.FileName);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
     }
 }
