@@ -28,9 +28,9 @@
                 </td>
                 <td>{{ job.createdAt | date:'MMM d, y h:mm a' }}</td>
                 <td class="text-end">
-                    <a [routerLink]="['/jobs', job.jobId]" class="btn btn-outline-primary btn-sm view-button">
-                        View
-                    </a>
+                    @if(showDownloadButton(job.jobStage,job.jobStatus)){
+                    <app-job-download [jobId]="job.jobId"></app-job-download>
+                    }
                 </td>
             </tr>
             } @empty {

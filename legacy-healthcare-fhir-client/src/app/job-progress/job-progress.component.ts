@@ -9,10 +9,12 @@ import { ImportJob, JobNotificationEvent, ProcessedJob } from '../models/job';
 import { ResourceTypeDetectionResult } from '../models/resource-type-detection-result';
 import { FieldMappingResult } from '../models/field-mapping-result';
 import { FormsModule } from '@angular/forms';
+import { showDownloadButton } from '../utils';
+import { JobDownloadComponent } from '../job-download/job-download.component';
 
 @Component({
   selector: 'app-job-progress',
-  imports: [NgTemplateOutlet, FormsModule],
+  imports: [NgTemplateOutlet, FormsModule, JobDownloadComponent],
   templateUrl: './job-progress.component.html',
   styleUrl: './job-progress.component.css'
 })
@@ -256,7 +258,7 @@ export class JobProgressComponent {
       this.jobBridgeService.getJobStatus() === JobStatus.Failed;
   }
 
-  public stringify(value: unknown): string {
-    return JSON.stringify(value, null, 2);
+  public showJobDownload(stage: JobStage, status: JobStatus): boolean {
+    return showDownloadButton(stage, status);
   }
 }

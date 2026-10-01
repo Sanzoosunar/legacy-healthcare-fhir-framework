@@ -1,0 +1,10 @@
+<button type="button" class="btn btn-success d-inline-flex align-items-center justify-content-center"
+    [class.btn-sm]="size === 'sm'" [class.btn-lg]="size === 'lg'" [disabled]="isDownloading"
+    aria-label="Download FHIR JSON" title="Download FHIR JSON" (click)="download()">
+    <svg [attr.width]="size === 'lg' ? 24 : size === 'sm' ? 16 : 20"
+        [attr.height]="size === 'lg' ? 24 : size === 'sm' ? 16 : 20" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3v12m-5-5 5 5 5-5" />
+        <path d="M3 16v4a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-4" />
+    </svg>
+</button>
