@@ -35,9 +35,18 @@
             </div>
             }
         </div>
-        <div>
-            <pre>{{stringify(processedJob!)}}</pre>
+
+        @if(showJobDownload(jobBridgeService.getJobStage(),jobBridgeService.getJobStatus())){
+        <div
+            class="d-flex align-items-center justify-content-between gap-3 bg-success-subtle border border-success-subtle rounded-3 p-3 mt-4">
+            <div>
+                <div class="fw-semibold text-success-emphasis">Your FHIR file is ready</div>
+                <div class="small text-secondary">Download the converted FHIR JSON file.</div>
+            </div>
+
+            <app-job-download [jobId]="jobBridgeService.getJobId()!" size="md"></app-job-download>
         </div>
+        }
     </div>
 </div>
 

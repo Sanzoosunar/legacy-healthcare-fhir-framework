@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { delay, Observable, of } from 'rxjs';
 import { ApproveFieldMappingRequest, ApproveFieldMappingResponse, ApproveResourceTypeRequest, ApproveResourceTypeResponse, CreateJobResponse, ReRunJobRequest } from '../models/job-response';
 import { backendUrl } from '../environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { FhirResourceType } from '../enums/resource-type';
 import { NormalizedFieldsResponse } from '../models/job';
 import { JobResponseDto } from '../models/dashboard-dto';
@@ -44,5 +44,9 @@ export class JobDataService {
 
   public approveFieldMapping(jobId: string, request: ApproveFieldMappingRequest): Observable<ApproveFieldMappingResponse> {
     return this.httpClient.post<ApproveFieldMappingResponse>(`${this.baseUrl}/${jobId}/field-mapping/approve`, request);
+  }
+
+  downloadJob(jobId: string): Observable<HttpResponse<Blob>> {
+    return this.httpClient.get(`${this.baseUrl}/${jobId}/download`, { responseType: 'blob', observe: 'response' });
   }
 }
