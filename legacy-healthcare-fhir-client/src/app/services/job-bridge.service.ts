@@ -61,34 +61,6 @@ export class JobBridgeService {
 
   private fieldMapping?: FieldMappingResult;
 
-  private fieldMapping1?: FieldMappingResult = {
-    configurationId: 1,
-    isApproved: false,
-    mappings: [
-      {
-        mappingId: 1,
-        sourceField: 'patient_id',
-        normalizedField: 'PatientId',
-        aiConfidence: 0.9812,
-        aiExplanation: 'Matched patient identifier field'
-      },
-      {
-        mappingId: 2,
-        sourceField: 'first_name',
-        normalizedField: 'FirstName',
-        aiConfidence: 0.9541,
-        aiExplanation: 'Matched patient first name'
-      },
-      {
-        mappingId: 3,
-        sourceField: 'dob',
-        normalizedField: 'DateOfBirth',
-        aiConfidence: 0.9012,
-        aiExplanation: 'Matched patient date of birth'
-      }
-    ]
-  };
-
   public setFieldMapping(result: FieldMappingResult): void {
     this.fieldMapping = result;
   }

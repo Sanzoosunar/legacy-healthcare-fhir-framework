@@ -185,9 +185,7 @@ export class JobProgressComponent {
   }
 
   public showFieldMappingAiSuggested(aiConfidence?: number): boolean {
-    const result = this.jobBridgeService.getFieldMapping();
-
-    return aiConfidence != null && result?.isApproved === false;
+    return aiConfidence != null
   }
 
   public getFieldMappingAiConfidence(aiConfidence?: number): string {
@@ -235,6 +233,7 @@ export class JobProgressComponent {
     }
 
     else if (event.stage === JobStage.FieldMapping && event.data) {
+      debugger;
       const result = event.data as FieldMappingResult;
       this.jobBridgeService.setFieldMapping(result);
     }
