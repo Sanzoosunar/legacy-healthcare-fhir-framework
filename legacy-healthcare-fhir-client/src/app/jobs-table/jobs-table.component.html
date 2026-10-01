@@ -15,7 +15,7 @@
             @for (job of jobs; track job.jobId) {
             <tr>
                 <td>{{ job.originalFileName }}</td>
-                <td>{{ job.resourceType ?? 'Not detected' }}</td>
+                <td>{{ getResourceTypeText(job.resourceType) }}</td>
                 <td>
                     <span [class]="'status-badge ' + jobStages[job.jobStage].className">
                         {{ jobStages[job.jobStage].label }}

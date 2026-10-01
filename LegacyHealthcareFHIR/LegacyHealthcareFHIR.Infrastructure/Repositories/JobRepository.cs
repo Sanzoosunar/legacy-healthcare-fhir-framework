@@ -16,7 +16,7 @@ public class JobRepository : IJobRepository
 
     public async Task<List<ImportJob>> GetJobsByHospitalId(int hospitalId)
     {
-        return await _dbContext.ImportJobs.AsNoTracking().Where(job => job.HospitalId == hospitalId).ToListAsync();
+        return await _dbContext.ImportJobs.Include(a=>a.ResourceTypeDetection).AsNoTracking().Where(job => job.HospitalId == hospitalId).ToListAsync();
     }
 
     public async Task<ImportJob> AddNewJob(int hospitalId, int userId, string originalFileName, string storedFileName, string format)

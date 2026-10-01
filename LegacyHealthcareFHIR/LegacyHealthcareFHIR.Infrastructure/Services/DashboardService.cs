@@ -5,15 +5,15 @@ using LegacyHealthcareFHIR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace LegacyHealthcareFHIR.Infrastructure.Services;
-public class DashboardService(AppDbContext _dbContext)
+public class DashboardService(IJobRepository _jobRepository)
 {
 	public async Task<DashboardDto> GetDashboard(int hospitalId)
 	{
-        var jobsQuery = _dbContext.ImportJobs.AsNoTracking().Where(job => job.HospitalId == hospitalId);
+        var jobs = await _jobRepository.GetJobsByHospitalId(hospitalId);
 
-        var statusCounts = await jobsQuery.GroupBy(job => job.Status).Select(group => new { Status = group.Key, Count = group.Count() }).ToListAsync();
+        var statusCounts = jobs.GroupBy(job => job.Status).Select(group => new { Status = group.Key, Count = group.Count() });
 
-        var recentJobs = await jobsQuery.OrderByDescending(job => job.CreatedAtUtc).Take(5).ToListAsync();
+        var recentJobs = jobs.OrderByDescending(job => job.CreatedAtUtc).Take(5);
 
         return new DashboardDto
         {
